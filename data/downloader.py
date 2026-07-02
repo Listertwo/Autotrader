@@ -1,5 +1,6 @@
 import time
 from utils.logger import logger
+from data.cache import load_cache, save_cache, is_cache_valid
 import yfinance as yf
 import pandas as pd
 
@@ -27,21 +28,23 @@ def download_data(symbol: str, start=None, end=None, period="1y", interval="1d")
     pd.DataFrame
         Historical OHLCV data
     """
+    if is_cache_valid(symbol, start, end, period, interval):
+        logger.info("Loading data from cache.")
+        return load_cache(symbol, period, interval)
+    else:
+        logger.info("No valid cache found. Downloading data from Yahoo Finance.")
+        try:
+            logger.info("Downloading data for %s", symbol)
+            df = yf.download(symbol, start=start, end=end, period=period, interval=interval)
+            
+            elapsed_time = time.perf_counter() - start_time
 
-    if not symbol:
-        logger.error("Symbol is required to download data.")
-        raise ValueError("Symbol is required to download data.")
+            logger.info("Data downloaded %d rows for %s in %.2f seconds", len(df), symbol, elapsed_time)
 
-    try:
-        logger.info("Downloading data for %s", symbol)
-        df = yf.download(symbol, start=start, end=end, period=period, interval=interval)
-        
-        elapsed_time = time.perf_counter() - start_time
-
-        logger.info("Data downloaded %d rows for %s in %.2f seconds", len(df), symbol, elapsed_time)
-    except Exception as e:
-        logger.exception("Error occurred while downloading data for %s: %s", symbol, e)
-        raise
+            save_cache(symbol, period, interval, df)
+        except Exception as e:
+            logger.exception("Error occurred while downloading data for %s: %s", symbol, e)
+            raise
     
     if df.empty:
         logger.warning("No data found for %s.", symbol)
