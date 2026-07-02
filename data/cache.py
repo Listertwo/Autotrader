@@ -1,51 +1,10 @@
 import pandas as pd
 
 from utils.logger import logger
+from utils.validator import validate_normalize
 from time import time
 from datetime import datetime
 from config import CACHE_DIR, VALID_PERIODS, VALID_INTERVALS
-
-def validate_data(symbol: str, start: datetime | None, end: datetime | None, period: str, interval: str) -> None:
-    """
-    Validate the data passed into the cache functions.
-
-    Parameters
-    ----------
-    symbol
-        Stock ticker (e.g. AAPL): str
-    start
-        Start date: datetime | None
-    end
-        End date: datetime | None
-    period
-        Time period (e.g. 1d, 5d, 1mo): str
-    interval
-        Data interval (e.g. 1h, 1d): str
-    """
-
-    if not isInstance(symbol, str):
-        if not symbol.strip():
-            raise ValueError("Symbol cannot be empty.")
-        raise ValueError("symbol must be a string.")
-    
-    if start is not None and not isInstance(start, datetime):
-        raise ValueError("start date must be a datetime or empty")
-        
-    if end is not None and not isInstance(end, datetime):
-        raise ValueError("end date must be a datetime or empty")
-    
-    if start and end and start > end:
-        raise ValueError("start date must be before end date")
-    
-    if not isInstance(period, str):
-        if period is not in VALID_PERIODS:
-            raise ValueError("period is an invalid length")
-        raise ValueError("period must be a string.")
-
-    if not isInstance(interval, str):
-        if interval is not in VALID_INTERVAL:
-            raise ValueError("interval is an invalid length")
-        raise ValueError("interval must be a string.")
 
 def get_cache_path(symbol: str, start: datetime, end: datetime, period: str, interval: str) -> str:
     """
@@ -66,15 +25,15 @@ def get_cache_path(symbol: str, start: datetime, end: datetime, period: str, int
     str
         Path to the cache file
     """
-
+    logger.info("Validating variable data. Modifying data, if necessary.")
+    symbol, start, end, period, interval = validate_normalize(symbol, start, end, period, interval)
+    
     logger.info("Getting cache path for %s_%s_%s.csv", symbol, period, interval)
+    if not CACHE_DIR.exists():
+        logger.info("CACHE_DIR does not exist. Creating cache directory %s", CACHE_DIR)
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    if validate_data(symbol, start, end, period, interval):
-        if not CACHE_DIR.exists():
-            logger.info("CACHE_DIR does not exist. Creating cache directory %s", CACHE_DIR)
-            CACHE_DIR.mkdir(parents=True, exist_ok=True)
-
-        return CACHE_DIR / "%s_%s_%s.csv" % (symbol, period, interval)
+    return CACHE_DIR / "%s_%s_%s.csv" % (symbol, period, interval)
 
 def is_cache_valid(symbol: str, period: str, interval: str) -> bool:
     """
