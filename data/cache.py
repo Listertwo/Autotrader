@@ -3,8 +3,7 @@ import pandas as pd
 from utils.logger import logger
 from utils.validator import validate_normalize
 from time import time
-from datetime import datetime
-from config import CACHE_DIR, VALID_PERIODS, VALID_INTERVALS
+from config import CACHE_DIR
 
 def get_cache_path(symbol: str, start: datetime, end: datetime, period: str, interval: str) -> str:
     """
