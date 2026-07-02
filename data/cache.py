@@ -3,51 +3,49 @@ import pandas as pd
 from utils.logger import logger
 from time import time
 from datetime import datetime
-from config import CACHE_DIR
+from config import CACHE_DIR, VALID_PERIODS, VALID_INTERVALS
 
-def validate_data(symbol, start, end, period, interval) -> bool:
+def validate_data(symbol: str, start: datetime | None, end: datetime | None, period: str, interval: str) -> None:
     """
     Validate the data passed into the cache functions.
 
     Parameters
     ----------
     symbol
-        Stock ticker (e.g. AAPL)
+        Stock ticker (e.g. AAPL): str
     start
-        Start date
+        Start date: datetime | None
     end
-        End date
+        End date: datetime | None
     period
-        Time period (e.g. 1d, 5d, 1mo)
+        Time period (e.g. 1d, 5d, 1mo): str
     interval
-        Data interval (e.g. 1h, 1d)
-
-    Returns
-    -------
-    bool
-        True if the data is valid, False otherwise
+        Data interval (e.g. 1h, 1d): str
     """
 
-    if not type(symbol) == str:
-        logger.critical("symbol must be a string. Got %s instead.", type(symbol))
+    if not isInstance(symbol, str):
+        if not symbol.strip():
+            raise ValueError("Symbol cannot be empty.")
         raise ValueError("symbol must be a string.")
     
-    if not type(start) == datetime:
-        logger.warning("start must be a datetime. Got %s instead.", type(start))
+    if start is not None and not isInstance(start, datetime):
+        raise ValueError("start date must be a datetime or empty")
+        
+    if end is not None and not isInstance(end, datetime):
+        raise ValueError("end date must be a datetime or empty")
     
-    if not type(end) == datetime:
-        logger.warning("end must be a datetime. Got %s instead.", type(end))
+    if start and end and start > end:
+        raise ValueError("start date must be before end date")
     
-    if not type(period) == str:
-        logger.critical("period must be a string. Got %s instead.", type(period))
+    if not isInstance(period, str):
+        if period is not in VALID_PERIODS:
+            raise ValueError("period is an invalid length")
         raise ValueError("period must be a string.")
 
-    
-    if not type(interval) == str:
-        logger.critical("interval must be a string. Got %s instead.", type(interval))
+    if not isInstance(interval, str):
+        if interval is not in VALID_INTERVAL:
+            raise ValueError("interval is an invalid length")
         raise ValueError("interval must be a string.")
-
-    return True
 
 def get_cache_path(symbol: str, start: datetime, end: datetime, period: str, interval: str) -> str:
     """
