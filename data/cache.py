@@ -1,40 +1,37 @@
 import pandas as pd
+from pathlib import Path
 
 from utils.logger import logger
 from utils.validator import validate_normalize
-from time import time
+import time
 from config import CACHE_DIR
 
-def get_cache_path(symbol: str, start: datetime, end: datetime, period: str, interval: str) -> str:
+def get_cache_path(symbol: str, period: str, interval: str) -> Path:
     """
     Get the path to the cache file.
 
     symbol : str
         Stock ticker (e.g. AAPL)
-    start : datetime | str | None
-        Start date
-    end : datetime | str | None
-        End date
     period : str
         Time period (e.g. 1d, 5d, 1mo)
     interval : str
         Data interval (e.g. 1h, 1d)
     Returns
     -------
-    str
+    Path
         Path to the cache file
     """
     logger.info("Validating variable data. Modifying data, if necessary.")
-    symbol, start, end, period, interval = validate_normalize(symbol, start, end, period, interval)
+    symbol, period, interval = validate_normalize(symbol, period, interval)
     
     logger.info("Getting cache path for %s_%s_%s.csv", symbol, period, interval)
     if not CACHE_DIR.exists():
         logger.info("CACHE_DIR does not exist. Creating cache directory %s", CACHE_DIR)
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    return CACHE_DIR / "%s_%s_%s.csv" % (symbol, period, interval)
+    return CACHE_DIR / f"{symbol}_{period}_{interval}.csv"
 
-def is_cache_valid(symbol: str, period: str, interval: str) -> bool:
+def has_cache(symbol: str, period: str, interval: str) -> bool:
     """
     Check if the cache file exists and is valid.
 
@@ -56,15 +53,14 @@ def is_cache_valid(symbol: str, period: str, interval: str) -> bool:
     cache_path = get_cache_path(symbol, period, interval)
 
     if cache_path.exists() and cache_path.stat().st_size > 0:
-        if is_cache_recent(symbol, period, interval):
-            logger.info("Found cache file for %s_%s_%s.csv", symbol, period, interval)
-            return True
+        logger.info("Found cache file for %s_%s_%s.csv", symbol, period, interval)
+        return True
     else:
         logger.warning("Could not find cache file or file is not valid for %s_%s_%s.csv", symbol, period, interval)
         return False
      
 
-def load_cache(symbol: str, period: str, interval: str) -> pd.DataFrame:
+def load_cache(symbol: str, period: str, interval: str) -> pd.DataFrame | None:
     """
     Load cached data from the cache file.
 
@@ -79,18 +75,23 @@ def load_cache(symbol: str, period: str, interval: str) -> pd.DataFrame:
 
     Returns
     -------
-    pd.DataFrame
-        Cached historical OHLCV data
+    pd.DataFrame | None
+        Cached historical OHLCV data or None if loading fails
     """
 
     cache_path = get_cache_path(symbol, period, interval)
     
-    if is_cache_valid(symbol, period, interval):
-        df = pd.read_csv(cache_path, index_col=0, parse_dates=True)
-        logger.info("Loaded %d rows.", df.shape[0])
-        return df
+    if is_cache_recent(symbol, period, interval):
+        try:
+            df = pd.read_csv(cache_path, index_col=0, parse_dates=True)
+            logger.info("Loaded %d rows.", df.shape[0])
+            return df
+        except Exception as e:
+            logger.exception("Error occurred while loading cache: %s", e)
+            cache_path.unlink(missing_ok=True)
+            return None
 
-def save_cache(symbol: str, period: str, interval: str, df: pd.DataFrame) -> None:
+def save_cache(symbol: str, period: str, interval: str, df: pd.DataFrame) -> bool:
     """
     Save data to the cache file.
 
@@ -104,22 +105,37 @@ def save_cache(symbol: str, period: str, interval: str, df: pd.DataFrame) -> Non
         Data interval (e.g. 1h, 1d)
     df : pd.DataFrame
         Historical OHLCV data to be cached
+    
+    Returns
+    -------
+    bool
+        True if the cache file was saved successfully, False otherwise
     """
 
     cache_path = get_cache_path(symbol, period, interval)
     
     logger.info("Saving cache")
+    try:
+        df.to_csv(cache_path)
+    except Exception as e:
+        logger.exception("Error occurred while saving cache: %s", e)
+        return False
 
-    df.to_csv(cache_path)
+    if has_cache(symbol, period, interval):
+        try:
+            test = pd.read_csv(cache_path, index_col=0, parse_dates=True)
+        except Exception as e:
+            logger.exception("Error occurred while reading back the cache file: %s", e)
+            return False
 
-    if is_cache_valid(symbol, period, interval):
-        test = pd.read_csv(cache_path, index_col=0, parse_dates=True)
-        if len(test) == len(df):
+        if test.shape == df.shape:
             logger.info("Saved cache %s (%d rows, %d)", cache_path, df.shape[0], cache_path.stat().st_size)
             return True
         else:
             logger.warning("Failed to save cache for %s_%s_%s.csv", symbol, period, interval)
             return False
+    else:
+        return False
 
 def is_cache_recent(symbol: str, period: str, interval: str, max_age_hours: int = 24) -> bool:
     """
@@ -142,11 +158,11 @@ def is_cache_recent(symbol: str, period: str, interval: str, max_age_hours: int 
         True if the cache file is recent, False otherwise
     """
 
-    cache_path = get_cache_path(symbol, period, interval)
-    
-    if not is_cache_valid(symbol, period, interval):
-        logger.warning("Cache file not found for %s_%s_%s.csv", symbol, period, interval)
+    if not has_cache(symbol, period, interval):
+        logger.warning("Cache file does not exist for %s_%s_%s.csv", symbol, period, interval)
         return False
+
+    cache_path = get_cache_path(symbol, period, interval)
     
     age = time.time() - cache_path.stat().st_mtime
     if age < max_age_hours * 3600:

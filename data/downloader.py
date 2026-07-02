@@ -41,7 +41,8 @@ def download_data(symbol: str, start=None, end=None, period="1y", interval="1d")
 
             logger.info("Data downloaded %d rows for %s in %.2f seconds", len(df), symbol, elapsed_time)
 
-            save_cache(symbol, period, interval, df)
+            if not save_cache(symbol, period, interval, df):
+                logger.warning("Failed to save cache for %s_%s_%s.csv", symbol, period, interval)
         except Exception as e:
             logger.exception("Error occurred while downloading data for %s: %s", symbol, e)
             raise
