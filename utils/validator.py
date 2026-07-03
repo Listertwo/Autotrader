@@ -1,5 +1,6 @@
 from datetime import datetime
 from config import VALID_PERIODS, VALID_INTERVALS
+from utils.logger import logger
 
 def validate_normalize(symbol: str, start: datetime | None, end: datetime | None, period: str, interval: str) -> tuple[str, datetime | None, datetime | None, str, str]:
     """
@@ -18,6 +19,8 @@ def validate_normalize(symbol: str, start: datetime | None, end: datetime | None
     interval
         Data interval (e.g. 1h, 1d): str
     """
+
+    logger.info("Validating variable data. Modifying data, if necessary.")
 
     #Validating Types
     if not isinstance(symbol, str):
@@ -49,14 +52,16 @@ def validate_normalize(symbol: str, start: datetime | None, end: datetime | None
 
     if period not in VALID_PERIODS:
         raise ValueError(
-            f"unsupported period: '{period}'."
+            f"unsupported period: '{period}'. "
             f"Expected one of: {sorted(VALID_PERIODS)}"
             )
     
     if interval not in VALID_INTERVALS:
         raise ValueError(
-            f"unsupported interval: '{interval}'."
+            f"unsupported interval: '{interval}'. "
             f"Expected one of: {sorted(VALID_INTERVALS)}"
             )
+
+    print(symbol, start, end, period, interval)
 
     return symbol, start, end, period, interval

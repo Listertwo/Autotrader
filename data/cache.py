@@ -21,9 +21,7 @@ def get_cache_path(symbol: str, period: str, interval: str) -> Path:
     Path
         Path to the cache file
     """
-    logger.info("Validating variable data. Modifying data, if necessary.")
-    symbol, period, interval = validate_normalize(symbol, period, interval)
-    
+        
     logger.info("Getting cache path for %s_%s_%s.csv", symbol, period, interval)
     if not CACHE_DIR.exists():
         logger.info("CACHE_DIR does not exist. Creating cache directory %s", CACHE_DIR)
@@ -90,6 +88,8 @@ def load_cache(symbol: str, period: str, interval: str) -> pd.DataFrame | None:
             logger.exception("Error occurred while loading cache: %s", e)
             cache_path.unlink(missing_ok=True)
             return None
+    else:    
+        return None
 
 def save_cache(symbol: str, period: str, interval: str, df: pd.DataFrame) -> bool:
     """
@@ -159,7 +159,6 @@ def is_cache_recent(symbol: str, period: str, interval: str, max_age_hours: int 
     """
 
     if not has_cache(symbol, period, interval):
-        logger.warning("Cache file does not exist for %s_%s_%s.csv", symbol, period, interval)
         return False
 
     cache_path = get_cache_path(symbol, period, interval)
