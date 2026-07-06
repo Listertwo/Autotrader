@@ -44,9 +44,15 @@ class SmaCrossoverStrategy(Strategy):
         fast = df[fast_col]
         slow = df[slow_col]
 
-        df["Buy"] = cross_over(fast, slow)
-        df["Sell"] = cross_under(fast, slow)
+        signal = 0
+        
+        if cross_over(fast, slow):
+            signal = 1
+        if cross_under(fast, slow):
+            signal = -1
 
+        df["Signal"] = signal
+        
         return df
     
 class EmaCrossoverStrategy(Strategy):
@@ -89,8 +95,14 @@ class EmaCrossoverStrategy(Strategy):
         fast = df[fast_col]
         slow = df[slow_col]
 
-        df["Buy"] = cross_over(fast, slow)
-        df["Sell"] = cross_under(fast, slow)
+        signal = 0
+        
+        if cross_over(fast, slow):
+            signal = 1
+        if cross_under(fast, slow):
+            signal = -1
+
+        df["Signal"] = signal
 
         return df
     
