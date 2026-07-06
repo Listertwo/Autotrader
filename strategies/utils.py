@@ -51,7 +51,7 @@ def cross_over_level(series: int, level: int):
         True if a crossover has occurred, False otherwise.
     """
 
-	return series > level and series.shift(1) <= level.shift(1)
+	return series > level and series.shift(1) <= level
 
 def cross_under_level(series: int, level: int):
     """
@@ -70,4 +70,4 @@ def cross_under_level(series: int, level: int):
         True if a crossunder has occurred, False otherwise.
     """
 
-	return series < level and series.shift(1) >= level.shift(1)
+	return series < level and series.shift(1) >= level
