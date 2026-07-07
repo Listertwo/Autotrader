@@ -2,7 +2,7 @@ from base import Strategy
 from crossover import SmaCrossoverStrategy
 
 class GoldenCrossStrategy(SmaCrossoverStrategy):
-	 """
+	"""
     A preset strategy that is based off of the SMA strategy.
 
 	A 1 indicates a Golden Cross -> Bullish Market.

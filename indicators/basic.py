@@ -474,9 +474,9 @@ def add_macd(df: pd.DataFrame, fast_period: int = 12, slow_period: int = 26, sig
 	-------
 	pd.DataFrame
 	    A copy of the input DataFrame with additional
-	    MACD_<fast_period>_<slow_period>_<signal_period>_<column>,
-	    MACD_Signal_<fast_period>_<slow_period>_<signal_period>_<column>,
-	    and MACD_Histogram_<fast_period>_<slow_period>_<signal_period>_<column>
+	    MACD_f{fast_period}_s{slow_period}_g{signal_period}_{column},
+	    MACD_Signal_f{fast_period}_s{slow_period}_g{signal_period}_{column},
+	    and MACD_Histogram_f{fast_period}_s{slow_period}_g{signal_period}_{column}
 	    columns.
 	"""
 

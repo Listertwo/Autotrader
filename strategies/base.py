@@ -24,3 +24,24 @@ class Strategy(ABC):
             DataFrame with trading signals.
         """
         raise NotImplementedError("This method should be implemented by subclasses.")
+    
+    def apply_signals(self, df, buy, sell):
+        """
+        Apply the generated signals to the DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Historical market data.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with trading signals applied.
+        """
+        
+        df["Signal"] = 0
+        df.loc[buy, "Signal"] = 1
+        df.loc[sell, "Signal"] = -1
+        
+        return df
