@@ -1,5 +1,3 @@
-import signal
-
 import pandas as pd
 
 from base import Strategy
@@ -11,8 +9,8 @@ class BaseRsiStrategy(Strategy):
 	A relative strength index momentum strategy.
 	"""
 
-	def __init__(self, period: int = 14, oversold: int = 30, overbought: int = 70):
-		super().__init__("RSI_Strategy")
+	def __init__(self, name: str, period: int = 14, oversold: int = 30, overbought: int = 70):
+		super().__init__(name)
 		self.period = period
 		self.oversold = oversold
 		self.overbought = overbought
@@ -24,7 +22,7 @@ class BaseRsiStrategy(Strategy):
 		if self.oversold <= 0 or self.overbought <= 0 or self.period <= 0:
 			raise ValueError("the oversold, overbought, and period values must all be positive integers")
 
-	def _prepare_rsi(df: pd.DataFrame, period: int) -> pd.DataFrame:
+	def _prepare_rsi(self, df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
 		"""
 		Prepare the DataFrame by adding the RSI column if it doesn't exist.
 
@@ -41,10 +39,10 @@ class BaseRsiStrategy(Strategy):
 			DataFrame with the RSI column added.
 		"""
 		
-		column_name = f"RSI_{period}_Close"
+		column_name = f"RSI_{self.period}_Close"
 		
 		if column_name not in df.columns:
-			df = add_rsi(df, period)
+			df = add_rsi(df, self.period)
 		
 		return df, column_name
 
@@ -54,10 +52,7 @@ class RsiStrategy(BaseRsiStrategy):
 	"""
 
 	def __init__(self, period=14, oversold=30, overbought=70):
-		super().__init__("RSI_Strategy")
-		self.period = period
-		self.oversold = oversold
-		self.overbought = overbought
+		super().__init__("RSI", period, oversold, overbought)
 
 	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
 		"""
@@ -74,7 +69,7 @@ class RsiStrategy(BaseRsiStrategy):
             DataFrame with trading signals.
         """
 
-		df, column_name = self._prepare_rsi(df, self.period)
+		df, column_name = self._prepare_rsi(df)
 
 		buy = cross_over_level(df[column_name], self.oversold)
 		sell = cross_under_level(df[column_name], self.overbought)
@@ -86,7 +81,7 @@ class RsiCenterlineStrategy(BaseRsiStrategy):
 	A relative stregnth index momentum strategy based on the centerline.
 	"""
 	def __init__(self, period: int = 14):
-		super().__init__("RSI_Centerline")
+		super().__init__("RSICenterline")
 		self.period = period
 		self.level = 50
 
@@ -105,7 +100,7 @@ class RsiCenterlineStrategy(BaseRsiStrategy):
             DataFrame with trading signals.
         """
 
-		df, column_name = self._prepare_rsi(df, self.period)
+		df, column_name = self._prepare_rsi(df)
 		
 		buy = cross_over_level(df[column_name], self.level)
 		sell = cross_under_level(df[column_name], self.level)
@@ -113,8 +108,8 @@ class RsiCenterlineStrategy(BaseRsiStrategy):
 		return self.apply_signals(df, buy, sell)
 
 class BaseMacdStrategy(Strategy):
-	def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
-		super().__init__("MACD_Strategy")
+	def __init__(self, name: str, fast: int = 12, slow: int = 26, signal: int = 9):
+		super().__init__(name)
 		self.fast = fast
 		self.slow = slow
 		self.signal = signal
@@ -126,7 +121,7 @@ class BaseMacdStrategy(Strategy):
 		if self.fast >= self.slow:
 			raise ValueError("the fast period must be lower than the slow period")
 	
-	def _prepare_macd(self, df: pd.DataFrame) -> pd.DataFrame:
+	def _prepare_macd(self, df: pd.DataFrame) -> tuple[pd.DataFrame, str, str, str]:
 		"""
 		Prepare the DataFrame by adding the MACD and signal columns if they don't exist.
 
@@ -161,7 +156,7 @@ class MacdStrategy(BaseMacdStrategy):
 	"""
 
 	def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
-		super().__init__("MACD_Strategy")
+		super().__init__("MACD", fast, slow, signal)
 
 	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
 		"""
@@ -191,7 +186,7 @@ class MacdZeroLineStrategy(BaseMacdStrategy):
 	"""
 
 	def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
-		super().__init__("MACD_ZeroLine")
+		super().__init__("MACDZeroLine", fast, slow, signal)
 
 	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
 		"""
@@ -221,7 +216,7 @@ class MacdHistogramStrategy(BaseMacdStrategy):
 	"""
 
 	def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
-		super().__init__("MACD_Histogram")
+		super().__init__("MACDHistogram", fast, slow, signal)
 
 	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
 		"""
@@ -260,7 +255,7 @@ class BaseStochasticStrategy(Strategy):
 		if self.k_period <= 0 or self.d_period <= 0:
 			raise ValueError("k_period and d_period must both be positive integers")
 
-	def _prepare_stochastic(self, df: pd.DataFrame) -> pd.DataFrame:
+	def _prepare_stochastic(self, df: pd.DataFrame) -> tuple[pd.DataFrame, str, str]:
 		"""
 		Prepare the DataFrame by adding the stochastic %K and %D columns if they don't exist.
 
@@ -292,7 +287,7 @@ class StochasticStrategy(BaseStochasticStrategy):
 	"""
 
 	def __init__(self, k_period: int = 14, d_period: int = 3):
-		super().__init__("Stochastic_Strategy")
+		super().__init__("Stochastic", k_period, d_period)
 
 	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
 		"""
@@ -321,10 +316,17 @@ class StochasticLevelStrategy(BaseStochasticStrategy):
 	A stochastic momentum strategy based on the overbought and oversold levels.
 	"""
 
-	def __init__(self, oversold: int = 20, overbought: int = 80):
-		super().__init__("Stochastic_Level")
+	def __init__(self, k_period: int = 14, d_period: int = 3, oversold: int = 20, overbought: int = 80):
+		super().__init__("StochasticLevel", k_period, d_period)
 		self.oversold = oversold
 		self.overbought = overbought
+
+		if not isinstance(self.overbought, int) or not isinstance(self.oversold, int):
+			raise TypeError("oversold and overbought parameters must be integers")
+		if self.oversold >= self.overbought:
+			raise ValueError("the oversold level must be lower than the overbought level")
+		if self.oversold <= 0 or self.overbought <= 0:
+			raise ValueError("the oversold and overbought values must be positive integers")
 
 	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
 		"""
@@ -354,7 +356,7 @@ class StochasticFilteredStrategy(BaseStochasticStrategy):
 	"""
 
 	def __init__(self, k_period: int = 14, d_period: int = 3):
-		super().__init__("Stochastic_Filtered")
+		super().__init__("StochasticFiltered", k_period, d_period)
 
 	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
 		"""
@@ -384,7 +386,7 @@ class StochasticCenterlineStrategy(BaseStochasticStrategy):
 	"""
 
 	def __init__(self, k_period: int = 14, d_period: int = 3):
-		super().__init__("Stochastic_Centerline")
+		super().__init__("StochasticCenterline", k_period, d_period)
 
 	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
 		"""
