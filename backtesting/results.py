@@ -22,6 +22,6 @@ class BacktestResults:
 
 	win_rate: float
 
-	longest_period: int
-	shortest_period: int
-	average_period: float
+	longest_holding: int
+	shortest_holding: int
+	average_holding: float
