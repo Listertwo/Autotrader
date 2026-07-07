@@ -21,3 +21,7 @@ class BacktestResults:
 	losing_trades: list
 
 	win_rate: float
+
+	longest_period: int
+	shortest_period: int
+	average_period: float
