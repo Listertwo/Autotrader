@@ -15,3 +15,5 @@ class Trade:
 
 	profit: float
 	return_pct: float
+
+	holding_period: int
