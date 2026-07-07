@@ -1,5 +1,6 @@
 import pandas as pd
 
+from typing import tuple
 from strategies.base import Strategy
 from trade import Trade
 from results import BacktestResults
@@ -9,12 +10,10 @@ class BacktestEngine:
 		self.initial_cash = initial_cash
 		self.commission = commission
 		
-	def _simulate(self, signals: pd.DataFrame) -> Dict[list, float]:
+	def _simulate(self, signals: pd.DataFrame) -> tuple[list[Trade], float]:
 		trades = []
 		cash = self.initial_cash
 		shares = 0
-		buy_flag = False
-		sell_flag = False
 		
 		for index, row in signals.iterrows():
 			row_signal = row["Signal"]
@@ -23,24 +22,24 @@ class BacktestEngine:
 			if row_signal == 1 and shares == 0:
 				entry_date = index
 				entry_price = row_price
+				cash_after_fee = cash - self.commission
 				
-				shares = cash / row_price
+				shares = cash_after_fee / row_price
 				cash = 0
 				entry_shares = shares
-				buy_flag = True
 
-			if row_signal == -1 and not shares == 0:
+			if row_signal == -1 and shares > 0:
 				exit_date = index
 				exit_price = row_price
 				
-				cash = shares * row_price
+				cash = (shares * row_price) - self.commission
 				shares = 0
-				sell_flag = True
 
-			if buy_flag and sell_flag:
 				cash_before = entry_shares * entry_price
 				profit = cash - cash_before
-				return_pct = pd.series([cash_before, profit]).pct_change() * 100
+				return_pct = (profit / cash_before) * 100
+
+				holding_period = (exit_date - entry_date).days
 				
 				trades.append(Trade(
 					entry_date = entry_date,
@@ -48,16 +47,39 @@ class BacktestEngine:
 					entry_price = entry_price,
 					exit_price = exit_price,
 					shares = entry_shares,
+					commission = self.commission,
 					profit = profit,
-					return_pct = return_pct
+					return_pct = return_pct,
+					holding_period = holding_period
 				))
 				
 				buy_flag = False
 				sell_flag = False
 
 		if shares > 0:
-			cash = shares * signals.iloc[-1]["Close"]
+			exit_date = signals.iloc[-1]["Index"]
+			exit_price = signals.iloc[-1]["Close"]
+			
+			cash = shares * exit_price - self.commission
 			shares = 0
+
+			cash_before = entry_shares * entry_price
+			profit = cash - cash_before
+			return_pct = (profit / cash_before) * 100
+
+			holding_period = (exit_date - entry_date).days
+			
+			trades.append(Trade(
+					entry_date = entry_date,
+					exit_date = exit_date,
+					entry_price = entry_price,
+					exit_price = exit_price,
+					shares = entry_shares,
+					commission = self.commission,
+					profit = profit,
+					return_pct = return_pct,
+					holding_period = holding_period
+				))
 
 		return trades, cash
 
@@ -65,7 +87,7 @@ class BacktestEngine:
 		trade_amount = len(trades)
 		
 		total_return = sum(trade.profit for trade in trades)
-		average_return = total_return / trade_amount
+		average_return = (total_return / trade_amount if trade_amount else 0.0)
 		
 		wins = sum(trade.profit > 0 for trade in trades)
 		losses = sum(trade.profit < 0 for trade in trades)
@@ -74,20 +96,24 @@ class BacktestEngine:
 		largest_loss = min(trade.profit for trade in trades, default=0.0)
 
 		winning_trades = [
-			trade.profit
+			trade
 			for trade in trades
 			if trade.profit >= 0
 		]
-		average_win = sum(winning_trades) / len(winning_trades)
+		average_win = (sum(winning_trades) / len(winning_trades) if winning_trades else 0.0)
 
 		losing_trades = [
-			trade.profit
+			trade
 			for trade in trades
 			if trade.profit < 0
 		]
-		average_loss = sum(losing_trades) / len(losing_trades)
-		
-		win_rate = wins / trade_amount if trades else 0.0
+		average_loss = (sum(losing_trades) / len(losing_trades) if losing_trades else 0.0)
+
+		win_rate = (wins / trade_amount if trade_amount else 0.0)
+
+		longest_holding = max(trade.holding_period for trade in trades, default=0.0)
+		shortest_holding = min(trade.holding_period for trade in trades, default=0.0)
+		average_holding = (sum(trade.holding_period) / trade_amount if trade_amount else 0.0)
 		
 		results = BacktestResults(
 			initial_cash = self.initial_cash,
@@ -103,7 +129,10 @@ class BacktestEngine:
 			largest_loss = largest_loss,
 			average_loss = average_loss,
 			losing_trades = losing_trades,
-			win_rate = win_rate
+			win_rate = win_rate,
+			longest_holding = longest_holding,
+			shortest_holding = shortest_holding,
+			average_holding = average_holding
 		)
 		
 		return results
