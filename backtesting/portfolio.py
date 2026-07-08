@@ -31,8 +31,9 @@ class Portfolio:
 	def has_position(self):
 		return self.shares > 0
 
-	def buy(self, date, price):
-
+	def buy(self, date, price) -> None:
+		if price <= 0:
+			raise ValueError("price must me postive.")
 		if self.has_position:
 			return
 
@@ -44,8 +45,9 @@ class Portfolio:
 		self.entry_date = date
 		self.entry_price = price
 
-	def sell(self, date, price):
-
+	def sell(self, date, price) -> None:
+		if price <= 0:
+			raise ValueError("price must me postive.")
 		if not self.has_position:
 			return
 
@@ -130,59 +132,3 @@ class Portfolio:
 		dd = self.drawdowns()
 
 		return min(dd) if dd else 0.0
-	
-	def from_portfolio(self, portfolio: Portfolio, initial_cash: float) -> BacktestResults:
-		trades = portfolio.trades
-		cash = initial_cash
-
-		trade_amount = len(trades)
-		
-		total_return = sum(trade.profit for trade in trades)
-		average_return = (total_return / trade_amount if trade_amount else 0.0)
-		
-		wins = sum(trade.profit > 0 for trade in trades)
-		losses = sum(trade.profit < 0 for trade in trades)
-
-		largest_win = max((trade.profit for trade in trades), default=0.0)
-		largest_loss = min((trade.profit for trade in trades), default=0.0)
-
-		winning_trades = [
-			trade
-			for trade in trades
-			if trade.profit >= 0
-		]
-		average_win = (sum(winning_trades) / len(winning_trades) if winning_trades else 0.0)
-
-		losing_trades = [
-			trade
-			for trade in trades
-			if trade.profit < 0
-		]
-		average_loss = (sum(losing_trades) / len(losing_trades) if losing_trades else 0.0)
-
-		win_rate = (wins / trade_amount if trade_amount else 0.0)
-
-		longest_holding = max((trade.holding_period for trade in trades), default=0.0)
-		shortest_holding = min((trade.holding_period for trade in trades), default=0.0)
-		average_holding = (sum((trade.holding_period for trade in trades), default=0.0) / trade_amount if trade_amount else 0.0)
-		
-		return BacktestResults.from_portfolio(
-			initial_cash = self.initial_cash,
-			final_cash = cash,
-			total_return = total_return,
-			average_return = average_return,
-			trades = trade_amount,
-			wins = wins,
-			largest_win = largest_win,
-			average_win = average_win,
-			winning_trades = winning_trades,
-			losses = losses,
-			largest_loss = largest_loss,
-			average_loss = average_loss,
-			losing_trades = losing_trades,
-			win_rate = win_rate,
-			longest_holding = longest_holding,
-			shortest_holding = shortest_holding,
-			average_holding = average_holding
-		)
-    
