@@ -59,7 +59,8 @@ class BacktestResults:
 			final_cash = cash,
 			total_return = total_return,
 			average_return = average_return,
-			trades = trade_amount,
+			trades = trades,
+			trade_count = trade_amount,
 			wins = wins,
 			largest_win = largest_win,
 			average_win = average_win,
@@ -189,7 +190,7 @@ class BacktestResults:
 			f"Net Profit:        ${self.total_return:,.2f}\n"
 			f"Average Trade:     ${self.average_return:,.2f}\n"
 			f"\n"
-			f"Trades:            {self.trades}\n"
+			f"Trades:            {self.trade_count}\n"
 			f"Wins:              {self.wins}\n"
 			f"Losses:            {self.losses}\n"
 			f"Win Rate:          {self.win_rate:.2%}\n"
@@ -211,6 +212,13 @@ class BacktestResults:
 			f"Recovery Factor:   {self.recovery:.2f}\n"
 			f"{'=' * 60}"
 		)
+
+	def print_trades(self):
+		print("\nTrades")
+		print("=" * 60)
+
+	for trade in self.trades:
+		print(trade)
 	
 	initial_cash: float
 	final_cash: float
@@ -218,7 +226,8 @@ class BacktestResults:
 	total_return: float
 	average_return: float
 
-	trades: int
+	trades: list[Trade]
+	trade_count: int
 
 	wins: int
 	largest_win: float
