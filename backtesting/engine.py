@@ -43,7 +43,4 @@ class BacktestEngine:
 
 		portfolio = self._simulate(signals)
 
-		return BacktestResults.from_portfolio(
-			portfolio,
-			self.initial_cash
-		)
+		return BacktestResults.from_portfolio(portfolio)
