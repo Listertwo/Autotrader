@@ -11,3 +11,4 @@ engine = BacktestEngine()
 results = engine.run(strategy, df)
 
 print(results)
+results.print_trades()
