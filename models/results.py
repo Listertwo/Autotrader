@@ -1,6 +1,11 @@
-from dataclasses import dataclass
 from __future__ import annotations
+
+import pandas as pd
+
+from dataclasses import dataclass
+
 from trade import Trade
+from backtesting import Portfolio
 
 @dataclass
 class BacktestResults:
@@ -8,7 +13,7 @@ class BacktestResults:
 	def from_portfolio(cls, portfolio: Portfolio) -> BacktestResults:
 		trades = portfolio.trades
 		cash = portfolio.cash
-
+		returns = pd.Series(portfolio.returns())
 		trade_amount = len(trades)
 		
 		total_return = sum(trade.profit for trade in trades)
@@ -37,11 +42,11 @@ class BacktestResults:
 		win_rate = (wins / trade_amount if trade_amount else 0.0)
 		loss_rate = (losses / trade_amount if trade_amount else 0.0)
 
+		winloss_ratio = (average_win / abs(average_loss) if average_loss else 0.0)
+
 		longest_holding = max((trade.holding_period for trade in trades), default=0.0)
 		shortest_holding = min((trade.holding_period for trade in trades), default=0.0)
 		average_holding = (sum(trade.holding_period for trade in trades) / trade_amount if trade_amount else 0.0)
-
-		returns = pd.Series(portfolio.returns())
 
 		sharpe_ratio, sharpe_rating = cls.calculate_sharpe(returns)
 		
@@ -64,6 +69,7 @@ class BacktestResults:
 			average_loss = average_loss,
 			losing_trades = losing_trades,
 			win_rate = win_rate,
+			winloss_ratio = winloss_ratio,
 			longest_holding = longest_holding,
 			shortest_holding = shortest_holding,
 			average_holding = average_holding,
@@ -74,14 +80,14 @@ class BacktestResults:
 			sortino_ratio = cls.calculate_sortino(returns),
 			drawdown = portfolio.drawdown(),
 			max_drawdown = portfolio.max_drawdown(),
-			calmar_ratio = cls.calculate_calmar(portfolio),
+			calmar_ratio = cls.calculate_calgar(portfolio),
 			gross_profit = gross_profit,
 			gross_loss = gross_loss,
 			profit_factor = profit_factor,
 			profit_rating = profit_rating,
 			expectancy = expectancy,
 			exposure = cls.calculate_exposure(trades),
-			recovery = cls.calculate_recovery()
+			recovery = cls.calculate_recovery(portfolio, trades)
 		)
 
 	def calculate_cagr(cls, portfolio: Portfolio) -> float:
@@ -150,9 +156,14 @@ class BacktestResults:
 
 		return days_in_market / 365 #Later implement total market day tally, possibly stored in Portfolio?
 
-	
-		
-	
+	def calculate_recovery(cls, portfolio: Portfolio, trades: list[Trade]) -> float:
+		net_profit = sum(
+			trade.profit - portfolio.commission
+			for trade in trades
+		)
+
+		return net_profit / portfolio.max_drawdown()
+
 	initial_cash: float
 	final_cash: float
 
