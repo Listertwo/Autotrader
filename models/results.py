@@ -178,6 +178,40 @@ class BacktestResults:
 
 		return net_profit / portfolio.max_drawdown()
 
+	def __str__(self) -> str:
+	 return (
+        f"\n"
+        f"{'=' * 60}\n"
+        f"BACKTEST RESULTS\n"
+        f"{'=' * 60}\n"
+        f"Initial Cash:      ${self.initial_cash:,.2f}\n"
+        f"Final Cash:        ${self.final_cash:,.2f}\n"
+        f"Net Profit:        ${self.total_return:,.2f}\n"
+        f"Average Trade:     ${self.average_return:,.2f}\n"
+        f"\n"
+        f"Trades:            {self.trades}\n"
+        f"Wins:              {self.wins}\n"
+        f"Losses:            {self.losses}\n"
+        f"Win Rate:          {self.win_rate:.2%}\n"
+        f"\n"
+        f"Largest Win:       ${self.largest_win:,.2f}\n"
+        f"Largest Loss:      ${self.largest_loss:,.2f}\n"
+        f"Average Win:       ${self.average_win:,.2f}\n"
+        f"Average Loss:      ${self.average_loss:,.2f}\n"
+        f"\n"
+        f"Profit Factor:     {self.profit_factor:.2f}\n"
+        f"Sharpe Ratio:      {self.sharpe_ratio:.2f}\n"
+        f"Sortino Ratio:     {self.sortino_ratio:.2f}\n"
+        f"Calmar Ratio:      {self.calmar_ratio:.2f}\n"
+        f"\n"
+        f"CAGR:              {self.cagr:.2%}\n"
+        f"Volatility:        {self.volatility:.2%}\n"
+        f"Max Drawdown:      {self.max_drawdown:.2%}\n"
+        f"Exposure:          {self.exposure:.2%}\n"
+        f"Recovery Factor:   {self.recovery:.2f}\n"
+        f"{'=' * 60}"
+    )
+	
 	initial_cash: float
 	final_cash: float
 
