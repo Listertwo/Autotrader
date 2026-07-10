@@ -52,7 +52,7 @@ class BacktestResults:
 		
 		gross_profit, gross_loss, profit_factor, profit_rating = cls.calculate_profit(trades)
 
-		expectancy = (win_rate * average_win) - (loss_rate * average_loss)
+		expectancy = (win_rate * average_win) + (loss_rate * average_loss)
 		
 		return cls(
 			initial_cash = portfolio.initial_cash,
@@ -74,13 +74,13 @@ class BacktestResults:
 			shortest_holding = shortest_holding,
 			average_holding = average_holding,
 			cagr = cls.calculate_cagr(portfolio),
-			volitility = cls.calculate_volitility(returns),
+			volatility = cls.calculate_volatility(returns),
 			sharpe_ratio = sharpe_ratio,
 			sharpe_rating = sharpe_rating,
 			sortino_ratio = cls.calculate_sortino(returns),
-			drawdown = portfolio.drawdown(),
+			drawdown = portfolio.drawdowns(),
 			max_drawdown = portfolio.max_drawdown(),
-			calmar_ratio = cls.calculate_calgar(portfolio),
+			calmar_ratio = cls.calculate_calmar(portfolio),
 			gross_profit = gross_profit,
 			gross_loss = gross_loss,
 			profit_factor = profit_factor,
@@ -90,65 +90,78 @@ class BacktestResults:
 			recovery = cls.calculate_recovery(portfolio, trades)
 		)
 
-	def calculate_cagr(cls, portfolio: Portfolio) -> float:
+	@staticmethod
+	def calculate_cagr(portfolio: Portfolio) -> float:
 		first_date = portfolio.history[0].date
 		last_date = portfolio.history[-1].date
 		years = (last_date - first_date).days / 365.25
 
+		if years <= 0:
+			return 0.0
+		
 		return (portfolio.cash / portfolio.initial_cash) ** (1/years) - 1
 
-	def calculate_volitility(cls, returns: pd.Series) -> float:
-		return returns.std()
+	@staticmethod
+	def calculate_volatility(returns: pd.Series) -> float:
+		return returns.std() * (252 ** 0.5)
 
-	def calculate_sharpe(cls, returns: pd.Series) -> tuple[float, str]:
-		ratio = (returns.mean() / returns.std())
+	@staticmethod
+	def calculate_sharpe(returns: pd.Series) -> tuple[float, str]:
+		sqrt252 = 252 ** 0.5
+		
+		ratio = sqrt252 * (returns.mean() / (returns.std())
 
 		if ratio < 1:
 			rating = "Mediocre"
-		elif ratio > 1 and ratio < 2:
+		elif ratio < 2:
 			rating = "Good"
-		elif ratio > 2 and ratio < 3:
+		elif ratio < 3:
 			rating = "Excellent"
-		elif ratio > 3:
+		else:
 			rating = "Exceptional"
 		
 		return ratio, rating
 
-	def calculate_sortino(cls, returns: pd.Series) -> float:
+	@staticmethod
+	def calculate_sortino(returns: pd.Series) -> float:
+		sqrt252 = 252 ** 0.5
 		downside = returns[returns < 0]
 
-		return (returns.mean() / downside.std())
+		return sqrt252 * (returns.mean() / downside.std())
 
-	def calculate_calgar(cls, portfolio: Portfolio) -> float:
+	@staticmethod
+	def calculate_calmar(portfolio: Portfolio) -> float:
 		cagr = cls.calculate_cagr(portfolio)
 
 		return cagr / abs(portfolio.max_drawdown())
 
-	def calculate_profit(cls, trades: list[Trade]) -> tuple[float, float, float, str]:
+	@staticmethod
+	def calculate_profit(trades: list[Trade]) -> tuple[float, float, float, str]:
 		gross_profit = sum(
 			trade.profit
 			for trade in trades
 			if trade.profit > 0
 		)
 
-		gross_loss = sum(
+		gross_loss = abs(sum(
 			trade.profit
 			for trade in trades
 			if trade.profit < 0
-		)
+		))
 
-		profit_factor = gross_profit / gross_loss
+		profit_factor = gross_profit / gross_loss if gross_loss else float("inf")
 
-		if profit_factor > 1:
-			profit_rating = "Net Positive"
-		elif profit_factor > 2:
+		if profit_factor >= 2:
 			profit_rating = "Excellent"
+		elif profit_factor >= 1:
+			profit_rating = "Net Positive"
 		else:
-			profit_rating = "Nothing Gained"
+			profit_rating = "Losing"
 
 		return gross_profit, gross_loss, profit_factor, profit_rating
 
-	def calculate_exposure(cls, trades: list[Trade]) -> float:
+	@staticmethod
+	def calculate_exposure(trades: list[Trade]) -> float:
 		days_in_market = sum(
 			trade.holding_period
 			for trade in trades
@@ -156,9 +169,10 @@ class BacktestResults:
 
 		return days_in_market / 365 #Later implement total market day tally, possibly stored in Portfolio?
 
-	def calculate_recovery(cls, portfolio: Portfolio, trades: list[Trade]) -> float:
+	@staticmethod
+	def calculate_recovery(portfolio: Portfolio, trades: list[Trade]) -> float:
 		net_profit = sum(
-			trade.profit - portfolio.commission
+			trade.profit
 			for trade in trades
 		)
 
