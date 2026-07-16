@@ -19,6 +19,8 @@ class BacktestEngine:
 			signal = row["Signal"]
 			price = row["Close"]
 
+			index = pd.to_datetime(index)
+
 			if signal == 1:
 				portfolio.buy(index, price)
 

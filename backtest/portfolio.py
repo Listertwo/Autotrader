@@ -68,7 +68,7 @@ class Portfolio:
 		profit = self.cash - cost_basis
 
 		return_pct = (profit / cost_basis) * 100
-
+		
 		holding_period = (date - self.entry_date).days
 
 		self.trades.append(

@@ -1,10 +1,10 @@
 from data.downloader import get_data
-from strategies.trend import GoldenCrossStrategy
+from strategies.crossover import EmaCrossoverStrategy
 from backtest.engine import BacktestEngine
 
-df = get_data("AAPL", period="5y", interval="1h")
+df = get_data("NFLX", period="1y", interval="1h")
 
-strategy = GoldenCrossStrategy()
+strategy = EmaCrossoverStrategy(50, 200)
 
 engine = BacktestEngine()
 

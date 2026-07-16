@@ -45,3 +45,36 @@
 2026-07-15 19:46:45,972 | Autotrader | INFO | Flattening MultiIndex columns
 2026-07-15 19:46:45,973 | Autotrader | INFO | Downloaded 0 rows for AAPL in 0.88 seconds
 2026-07-15 19:46:45,973 | Autotrader | CRITICAL | No data found for AAPL.
+2026-07-16 14:01:41,186 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-16 14:01:41,187 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:01:41,187 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:01:41,188 | Autotrader | WARNING | Could not find cache file or file is not valid for NFLX_1y_1h.csv
+2026-07-16 14:01:41,188 | Autotrader | INFO | Downloading data for NFLX
+2026-07-16 14:01:45,247 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-16 14:01:45,248 | Autotrader | INFO | Downloaded 1741 rows for NFLX in 4.06 seconds
+2026-07-16 14:01:45,250 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:01:45,251 | Autotrader | INFO | Saving cache
+2026-07-16 14:01:45,307 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:01:45,308 | Autotrader | INFO | Found cache file for NFLX_1y_1h.csv
+2026-07-16 14:01:45,356 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\NFLX_1y_1h.csv (1741 rows, 184028)
+2026-07-16 14:03:11,923 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-16 14:03:11,924 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:03:11,924 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:03:11,925 | Autotrader | INFO | Found cache file for NFLX_1y_1h.csv
+2026-07-16 14:03:11,925 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:03:11,926 | Autotrader | INFO | Cache file is recent for NFLX_1y_1h.csv
+2026-07-16 14:03:11,947 | Autotrader | INFO | Loaded 1741 rows.
+2026-07-16 14:05:39,081 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-16 14:05:39,081 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:05:39,082 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:05:39,082 | Autotrader | INFO | Found cache file for NFLX_1y_1h.csv
+2026-07-16 14:05:39,082 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:05:39,083 | Autotrader | INFO | Cache file is recent for NFLX_1y_1h.csv
+2026-07-16 14:05:39,107 | Autotrader | INFO | Loaded 1741 rows.
+2026-07-16 14:10:22,361 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-16 14:10:22,362 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:10:22,362 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:10:22,363 | Autotrader | INFO | Found cache file for NFLX_1y_1h.csv
+2026-07-16 14:10:22,363 | Autotrader | INFO | Getting cache path for NFLX_1y_1h.csv
+2026-07-16 14:10:22,363 | Autotrader | INFO | Cache file is recent for NFLX_1y_1h.csv
+2026-07-16 14:10:22,385 | Autotrader | INFO | Loaded 1741 rows.
