@@ -85,7 +85,6 @@ class Portfolio:
 			)
 		)
 
-		self.cash = cash
 		self.shares = 0.0
 
 		self.entry_date = None

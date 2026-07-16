@@ -4,8 +4,8 @@ import pandas as pd
 
 from dataclasses import dataclass
 
-from trade import Trade
-from backtesting import Portfolio
+from models.trade import Trade
+from backtest.portfolio import Portfolio
 
 @dataclass
 class BacktestResults:
@@ -110,7 +110,7 @@ class BacktestResults:
 	def calculate_sharpe(returns: pd.Series) -> tuple[float, str]:
 		sqrt252 = 252 ** 0.5
 		
-		ratio = sqrt252 * (returns.mean() / (returns.std())
+		ratio = sqrt252 * returns.mean() / (returns.std())
 
 		if ratio < 1:
 			rating = "Mediocre"
@@ -132,7 +132,7 @@ class BacktestResults:
 
 	@staticmethod
 	def calculate_calmar(portfolio: Portfolio) -> float:
-		cagr = cls.calculate_cagr(portfolio)
+		cagr = BacktestResults.calculate_cagr(portfolio)
 
 		return cagr / abs(portfolio.max_drawdown())
 
@@ -217,8 +217,8 @@ class BacktestResults:
 		print("\nTrades")
 		print("=" * 60)
 
-	for trade in self.trades:
-		print(trade)
+		for trade in self.trades:
+			print(trade)
 	
 	initial_cash: float
 	final_cash: float

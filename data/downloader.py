@@ -1,4 +1,5 @@
 import time
+from data.normalize import normalize_dataframe
 from utils.logger import logger
 from utils.validator import validate_normalize
 from data.cache import load_cache, save_cache
@@ -31,14 +32,14 @@ def get_data(symbol: str, start=None, end=None, period="1y", interval="1d") -> p
     symbol, start, end, period, interval = validate_normalize(symbol, start, end, period, interval)
 
     df = load_cache(symbol, period, interval)
-
+    
     if df is not None:
         return df
  
     df = download_data(symbol, start=start, end=end, period=period, interval=interval)
     
-    #Normalize downloaded data before saving to cache
-    
+    df = normalize_dataframe(df)
+
     if not save_cache(symbol, period, interval, df):
         logger.warning("Failed to save cache for %s", symbol)
 
@@ -73,6 +74,18 @@ def download_data(symbol: str, start=None, end=None, period="1y", interval="1d")
         logger.info("Downloading data for %s", symbol)
         df = yf.download(symbol, start=start, end=end, period=period, interval=interval)
         
+        print("Before flatten:")
+        print(type(df.columns))
+        print(df.columns)
+        
+        if isinstance(df.columns, pd.MultiIndex):
+            logger.info("Flattening MultiIndex columns")
+            df.columns = df.columns.get_level_values(0)
+        
+        print("After flatten:")
+        print(type(df.columns))
+        print(df.columns)
+
         elapsed_time = time.perf_counter() - start_time
 
         logger.info("Downloaded %d rows for %s in %.2f seconds", len(df), symbol, elapsed_time)

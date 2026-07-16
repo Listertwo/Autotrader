@@ -1,0 +1,47 @@
+2026-07-15 19:39:50,467 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-15 19:39:50,468 | Autotrader | INFO | Getting cache path for AAPL_5y_1d.csv
+2026-07-15 19:39:50,468 | Autotrader | INFO | Getting cache path for AAPL_5y_1d.csv
+2026-07-15 19:39:50,468 | Autotrader | WARNING | Could not find cache file or file is not valid for AAPL_5y_1d.csv
+2026-07-15 19:39:50,468 | Autotrader | INFO | Downloading data for AAPL
+2026-07-15 19:39:51,254 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-15 19:39:51,255 | Autotrader | INFO | Downloaded 1254 rows for AAPL in 0.79 seconds
+2026-07-15 19:39:51,258 | Autotrader | INFO | Getting cache path for AAPL_5y_1d.csv
+2026-07-15 19:39:51,258 | Autotrader | INFO | Saving cache
+2026-07-15 19:39:51,268 | Autotrader | INFO | Getting cache path for AAPL_5y_1d.csv
+2026-07-15 19:39:51,268 | Autotrader | INFO | Found cache file for AAPL_5y_1d.csv
+2026-07-15 19:39:51,285 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\AAPL_5y_1d.csv (1254 rows, 119533)
+2026-07-15 19:43:47,353 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-15 19:43:47,354 | Autotrader | INFO | Getting cache path for AAPL_5y_1d.csv
+2026-07-15 19:43:47,354 | Autotrader | INFO | Getting cache path for AAPL_5y_1d.csv
+2026-07-15 19:43:47,354 | Autotrader | INFO | Found cache file for AAPL_5y_1d.csv
+2026-07-15 19:43:47,354 | Autotrader | INFO | Getting cache path for AAPL_5y_1d.csv
+2026-07-15 19:43:47,355 | Autotrader | INFO | Cache file is recent for AAPL_5y_1d.csv
+2026-07-15 19:43:47,364 | Autotrader | INFO | Loaded 1254 rows.
+2026-07-15 19:45:01,877 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-15 19:45:01,877 | Autotrader | INFO | Getting cache path for AAPL_1y_5m.csv
+2026-07-15 19:45:01,877 | Autotrader | INFO | Getting cache path for AAPL_1y_5m.csv
+2026-07-15 19:45:01,878 | Autotrader | WARNING | Could not find cache file or file is not valid for AAPL_1y_5m.csv
+2026-07-15 19:45:01,878 | Autotrader | INFO | Downloading data for AAPL
+2026-07-15 19:45:02,809 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-15 19:45:02,809 | Autotrader | INFO | Downloaded 0 rows for AAPL in 0.93 seconds
+2026-07-15 19:45:02,809 | Autotrader | CRITICAL | No data found for AAPL.
+2026-07-15 19:45:46,220 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-15 19:45:46,221 | Autotrader | INFO | Getting cache path for AAPL_1y_1h.csv
+2026-07-15 19:45:46,221 | Autotrader | INFO | Getting cache path for AAPL_1y_1h.csv
+2026-07-15 19:45:46,222 | Autotrader | WARNING | Could not find cache file or file is not valid for AAPL_1y_1h.csv
+2026-07-15 19:45:46,222 | Autotrader | INFO | Downloading data for AAPL
+2026-07-15 19:45:47,205 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-15 19:45:47,206 | Autotrader | INFO | Downloaded 1740 rows for AAPL in 0.98 seconds
+2026-07-15 19:45:47,208 | Autotrader | INFO | Getting cache path for AAPL_1y_1h.csv
+2026-07-15 19:45:47,209 | Autotrader | INFO | Saving cache
+2026-07-15 19:45:47,244 | Autotrader | INFO | Getting cache path for AAPL_1y_1h.csv
+2026-07-15 19:45:47,245 | Autotrader | INFO | Found cache file for AAPL_1y_1h.csv
+2026-07-15 19:45:47,269 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\AAPL_1y_1h.csv (1740 rows, 184890)
+2026-07-15 19:46:45,087 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-15 19:46:45,088 | Autotrader | INFO | Getting cache path for AAPL_5y_1h.csv
+2026-07-15 19:46:45,088 | Autotrader | INFO | Getting cache path for AAPL_5y_1h.csv
+2026-07-15 19:46:45,088 | Autotrader | WARNING | Could not find cache file or file is not valid for AAPL_5y_1h.csv
+2026-07-15 19:46:45,088 | Autotrader | INFO | Downloading data for AAPL
+2026-07-15 19:46:45,972 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-15 19:46:45,973 | Autotrader | INFO | Downloaded 0 rows for AAPL in 0.88 seconds
+2026-07-15 19:46:45,973 | Autotrader | CRITICAL | No data found for AAPL.

@@ -1,9 +1,6 @@
 import pandas as pd
 
-from typing import tuple
-from portfolio import Portfolio
-from strategies.base import Strategy
-from models.trade import Trade
+from backtest.portfolio import Portfolio
 from models.results import BacktestResults
 
 class BacktestEngine:

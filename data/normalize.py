@@ -1,18 +1,23 @@
 import pandas as pd
-import datetime
 
 from utils.logger import logger
 from config import REQUIRED_COLUMNS
 
-#REQUIRED_COLUMNS = {"Open", "Close", "High", "Low", "Volume"}
 DATE_COLUMNS = {"Date", "Datetime", "Timestamp", "Time"}
 
-def normalize_DataFrame(df: pd.DataFrame) -> pd.DataFrame:
+def normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
-    
-    returns
-    --------
-    DataFrame
+    Normalize a pandas DataFrame for consistent data handling.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to normalize
+
+    Returns
+    -------
+    pd.DataFrame
+        The normalized DataFrame
     """
 
     #Validation of DataFrame
@@ -24,14 +29,16 @@ def normalize_DataFrame(df: pd.DataFrame) -> pd.DataFrame:
     #Creates copy of df for normalization
     df = df.copy()
     
+    
+
     #Define column labels
     missing = REQUIRED_COLUMNS - set(df.columns)
     extra = set(df.columns) - REQUIRED_COLUMNS
     
     if missing:
-        raise ValueError(f"missing required columns: {sorted(colcount)}")
+        raise ValueError(f"missing required columns: {sorted(missing)}")
     if extra:
-        logger.info(f"DataFrame has extra columns: {sorted(colcount)}")
+        logger.info(f"DataFrame has extra columns: {sorted(extra)}")
     
     #Normallizes index as a datetime
     if not isinstance(df.index, pd.DatetimeIndex): #Is the Index not a Datetime?

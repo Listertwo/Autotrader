@@ -1,4 +1,4 @@
-from pandas import pd
+import pandas as pd
 
 
 def cross_over(series1: pd.Series, series2: pd.Series) -> pd.Series:

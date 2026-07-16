@@ -1,5 +1,4 @@
-from base import Strategy
-from crossover import SmaCrossoverStrategy
+from strategies.crossover import SmaCrossoverStrategy
 
 class GoldenCrossStrategy(SmaCrossoverStrategy):
 	"""
