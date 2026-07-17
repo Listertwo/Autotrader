@@ -1,10 +1,10 @@
 from data.downloader import get_data
-from strategies.crossover import EmaCrossoverStrategy
+from strategies.momentum import RsiStrategy
 from backtest.engine import BacktestEngine
 
-df = get_data("NFLX", period="1y", interval="1h")
+df = get_data("AAPL", period="1y", interval="1h")
 
-strategy = EmaCrossoverStrategy(50, 200)
+strategy = RsiStrategy()
 
 engine = BacktestEngine()
 

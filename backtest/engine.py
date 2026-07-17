@@ -30,7 +30,7 @@ class BacktestEngine:
 			portfolio.snapshot(index, price)
 
 		portfolio.close(
-			signals.index[-1],
+			pd.to_datetime(signals.index[-1]),
 			signals.iloc[-1]["Close"]
 		)
 

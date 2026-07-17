@@ -1,6 +1,6 @@
 import pandas as pd
 
-from base import Strategy
+from strategies.base import Strategy
 from indicators.basic import add_rsi, add_macd, add_stochastic
 from strategies.utils import cross_under, cross_over, cross_under_level, cross_over_level
 
