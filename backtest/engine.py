@@ -2,46 +2,61 @@ import pandas as pd
 
 from backtest.portfolio import Portfolio
 from models.results import BacktestResults
+from models.event import MarketEvent
 
 class BacktestEngine:
 	def __init__(self, initial_cash: float = 10000, commission: float = 0.0):
 		self.initial_cash = initial_cash
 		self.commission = commission
 		
-	def _simulate(self, signals):
+	def _simulate(self, events):
 		portfolio = Portfolio(
 			self.initial_cash,
 			self.commission
 		)
 
-		for index, row in signals.iterrows():
+		for event in events: 
+			if event.signal == 1:
+				portfolio.buy(event.date, event.price)
 
-			signal = row["Signal"]
-			price = row["Close"]
+			elif event.signal == -1:
+				portfolio.sell(event.date, event.price)
 
-			index = pd.to_datetime(index)
-
-			if signal == 1:
-				portfolio.buy(index, price)
-
-			elif signal == -1:
-				portfolio.sell(index, price)
-
-			portfolio.snapshot(index, price)
+			portfolio.snapshot(event.date, event.price)
 
 		portfolio.close(
-			pd.to_datetime(signals.index[-1]),
-			signals.iloc[-1]["Close"]
+			events[-1].date,
+			events[-1].price
 		)
 
 		return portfolio
-	
-	def run(self, strategy, df):
 
-		df, buy, sell = strategy.generate_signals(df)
+	def _build_events(self, signals):
+		events = []
 
-		signals = strategy.apply_signals(df, buy, sell)
+		for symbol, df in signals.items():
+			for index, row in df.iterrows():
+				events.append(
+					MarketEvent(
+						date = index,
+						symbol = symbol,
+						price = row["Close"],
+						signal = row["Signal"]
+					)
+				)
 
-		portfolio = self._simulate(signals)
+		events.sort(key=lambda event: event.date)
+
+		return events
+
+	def run(self, strategy, data: dict[str, pd.DataFrame]):
+		
+		signals = {}
+		for symbol, df in data.items():
+			signals[symbol] = strategy.generate_signals(df)
+
+		events = self._build_events(signals)
+		
+		portfolio = self._simulate(events)
 
 		return BacktestResults.from_portfolio(portfolio)
