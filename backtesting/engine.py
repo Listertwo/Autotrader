@@ -37,9 +37,11 @@ class BacktestEngine:
 
 		return portfolio
 	
-	def run(self, strategy, df):
-
-		signals = strategy.generate_signals(df)
+	def run(self, strategy, data: dict[str, pd.DataFrame]):
+		
+		signals = {}
+		for symbol, df in data.items():
+			signals[symbol] = strategy.generate_signals(df)
 
 		portfolio = self._simulate(signals)
 
