@@ -54,7 +54,7 @@ class RsiStrategy(BaseRsiStrategy):
 	def __init__(self, period=14, oversold=30, overbought=70):
 		super().__init__("RSI", period, oversold, overbought)
 
-	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
         Generate trading signals based on strength index momentum.
 
@@ -65,8 +65,8 @@ class RsiStrategy(BaseRsiStrategy):
 
         Returns
         -------
-        pd.DataFrame
-            DataFrame with trading signals.
+        tuple[pd.DataFrame, pd.Series, pd.Series]
+            The DataFrame, the buy mask, and the sell mask.
         """
 
 		df, column_name = self._prepare_rsi(df)
@@ -74,7 +74,7 @@ class RsiStrategy(BaseRsiStrategy):
 		buy = cross_over_level(df[column_name], self.oversold)
 		sell = cross_under_level(df[column_name], self.overbought)
 
-		return self.apply_signals(df, buy, sell)
+		return df, buy, sell
 
 class RsiCenterlineStrategy(BaseRsiStrategy):
 	"""
@@ -85,7 +85,7 @@ class RsiCenterlineStrategy(BaseRsiStrategy):
 		self.period = period
 		self.level = 50
 
-	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
         Generate trading signals based on strength index momentum based on the centerline.
 
@@ -96,8 +96,8 @@ class RsiCenterlineStrategy(BaseRsiStrategy):
 
         Returns
         -------
-        pd.DataFrame
-            DataFrame with trading signals.
+        tuple[pd.DataFrame, pd.Series, pd.Series]
+            The DataFrame, the buy mask, and the sell mask.
         """
 
 		df, column_name = self._prepare_rsi(df)
@@ -105,7 +105,7 @@ class RsiCenterlineStrategy(BaseRsiStrategy):
 		buy = cross_over_level(df[column_name], self.level)
 		sell = cross_under_level(df[column_name], self.level)
 
-		return self.apply_signals(df, buy, sell)
+		return df, buy, sell
 
 class BaseMacdStrategy(Strategy):
 	def __init__(self, name: str, fast: int = 12, slow: int = 26, signal: int = 9):
@@ -158,7 +158,7 @@ class MacdStrategy(BaseMacdStrategy):
 	def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
 		super().__init__("MACD", fast, slow, signal)
 
-	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
 		Generate trading signals based on moving average convergence divergence momentum.
 
@@ -169,8 +169,8 @@ class MacdStrategy(BaseMacdStrategy):
 
 		Returns
 		-------
-		pd.DataFrame
-			DataFrame with trading signals.
+		tuple[pd.DataFrame, pd.Series, pd.Series]
+			The DataFrame, the buy mask, and the sell mask.
 		"""
 
 		df, macd, signal, hist = self._prepare_macd(df)
@@ -178,7 +178,7 @@ class MacdStrategy(BaseMacdStrategy):
 		buy = cross_over(df[macd], df[signal])
 		sell = cross_under(df[macd], df[signal])
 
-		return self.apply_signals(df, buy, sell)
+		return df, buy, sell
 	
 class MacdZeroLineStrategy(BaseMacdStrategy):
 	"""
@@ -188,7 +188,7 @@ class MacdZeroLineStrategy(BaseMacdStrategy):
 	def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
 		super().__init__("MACDZeroLine", fast, slow, signal)
 
-	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
 		Generate trading signals based on moving average convergence divergence momentum based on the zero line.
 
@@ -199,8 +199,8 @@ class MacdZeroLineStrategy(BaseMacdStrategy):
 
 		Returns
 		-------
-		pd.DataFrame
-			DataFrame with trading signals.
+		tuple[pd.DataFrame, pd.Series, pd.Series]
+			The DataFrame, the buy mask, and the sell mask.
 		"""
 
 		df, macd, signal, hist = self._prepare_macd(df)
@@ -208,7 +208,7 @@ class MacdZeroLineStrategy(BaseMacdStrategy):
 		buy = cross_over_level(df[macd], 0)
 		sell = cross_under_level(df[macd], 0)
 
-		return self.apply_signals(df, buy, sell)
+		return df, buy, sell
 	
 class MacdHistogramStrategy(BaseMacdStrategy):
 	"""
@@ -218,7 +218,7 @@ class MacdHistogramStrategy(BaseMacdStrategy):
 	def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
 		super().__init__("MACDHistogram", fast, slow, signal)
 
-	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
 		Generate trading signals based on moving average convergence divergence momentum based on the histogram.
 
@@ -229,8 +229,8 @@ class MacdHistogramStrategy(BaseMacdStrategy):
 
 		Returns
 		-------
-		pd.DataFrame
-			DataFrame with trading signals.
+		tuple[pd.DataFrame, pd.Series, pd.Series]
+			The DataFrame, the buy mask, and the sell mask.
 		"""
 
 		df, macd, signal, hist = self._prepare_macd(df)
@@ -238,7 +238,7 @@ class MacdHistogramStrategy(BaseMacdStrategy):
 		buy = cross_over_level(df[hist], 0)
 		sell = cross_under_level(df[hist], 0)
 
-		return self.apply_signals(df, buy, sell)
+		return df, buy, sell
 
 class BaseStochasticStrategy(Strategy):
 	"""
@@ -289,7 +289,7 @@ class StochasticStrategy(BaseStochasticStrategy):
 	def __init__(self, k_period: int = 14, d_period: int = 3):
 		super().__init__("Stochastic", k_period, d_period)
 
-	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
 		Generate trading signals based on stochastic momentum.
 
@@ -300,8 +300,8 @@ class StochasticStrategy(BaseStochasticStrategy):
 
 		Returns
 		-------
-		pd.DataFrame
-			DataFrame with trading signals.
+		tuple[pd.DataFrame, pd.Series, pd.Series]
+			The DataFrame, the buy mask, and the sell mask.
 		"""
 
 		df, k, d = self._prepare_stochastic(df)
@@ -309,7 +309,7 @@ class StochasticStrategy(BaseStochasticStrategy):
 		buy = cross_over(df[k], df[d])
 		sell = cross_under(df[k], df[d])
 
-		return self.apply_signals(df, buy, sell)
+		return df, buy, sell
 	
 class StochasticLevelStrategy(BaseStochasticStrategy):
 	"""
@@ -328,7 +328,7 @@ class StochasticLevelStrategy(BaseStochasticStrategy):
 		if self.oversold <= 0 or self.overbought <= 0:
 			raise ValueError("the oversold and overbought values must be positive integers")
 
-	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
 		Generate trading signals based on stochastic momentum based on the overbought and oversold levels.
 
@@ -339,8 +339,8 @@ class StochasticLevelStrategy(BaseStochasticStrategy):
 
 		Returns
 		-------
-		pd.DataFrame
-			DataFrame with trading signals.
+		tuple[pd.DataFrame, pd.Series, pd.Series]
+			The DataFrame, the buy mask, and the sell mask.
 		"""
 
 		df, k, d = self._prepare_stochastic(df)
@@ -348,7 +348,7 @@ class StochasticLevelStrategy(BaseStochasticStrategy):
 		buy = cross_over_level(df[k], self.oversold)
 		sell = cross_under_level(df[k], self.overbought)
 
-		return self.apply_signals(df, buy, sell)
+		return df, buy, sell
 	
 class StochasticFilteredStrategy(BaseStochasticStrategy):
 	"""
@@ -358,7 +358,7 @@ class StochasticFilteredStrategy(BaseStochasticStrategy):
 	def __init__(self, k_period: int = 14, d_period: int = 3):
 		super().__init__("StochasticFiltered", k_period, d_period)
 
-	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
 		Generate trading signals based on stochastic momentum filtered by the %D line.
 
@@ -369,8 +369,8 @@ class StochasticFilteredStrategy(BaseStochasticStrategy):
 
 		Returns
 		-------
-		pd.DataFrame
-			DataFrame with trading signals.
+		tuple[pd.DataFrame, pd.Series, pd.Series]
+			The DataFrame, the buy mask, and the sell mask.
 		"""
 
 		df, k, d = self._prepare_stochastic(df)
@@ -378,7 +378,7 @@ class StochasticFilteredStrategy(BaseStochasticStrategy):
 		buy = (cross_over(df[k], df[d]) & (df[k] < 20) & (df[d] < 20))
 		sell = (cross_under(df[k], df[d]) & (df[k] > 80) & (df[d] > 80))
 
-		return self.apply_signals(df, buy, sell)
+		return df, buy, sell
 	
 class StochasticCenterlineStrategy(BaseStochasticStrategy):
 	"""
@@ -388,7 +388,7 @@ class StochasticCenterlineStrategy(BaseStochasticStrategy):
 	def __init__(self, k_period: int = 14, d_period: int = 3):
 		super().__init__("StochasticCenterline", k_period, d_period)
 
-	def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
 		Generate trading signals based on stochastic momentum based on the centerline.
 
@@ -399,8 +399,8 @@ class StochasticCenterlineStrategy(BaseStochasticStrategy):
 
 		Returns
 		-------
-		pd.DataFrame
-			DataFrame with trading signals.
+		tuple[pd.DataFrame, pd.Series, pd.Series]
+			The DataFrame, the buy mask, and the sell mask.
 		"""
 
 		df, k, d = self._prepare_stochastic(df)
@@ -408,4 +408,4 @@ class StochasticCenterlineStrategy(BaseStochasticStrategy):
 		buy = cross_over_level(df[k], 50)
 		sell = cross_under_level(df[k], 50)
 
-		return self.apply_signals(df, buy, sell)
+		return df, buy, sell

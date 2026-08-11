@@ -14,7 +14,7 @@ class SmaCrossoverStrategy(Strategy):
         self.fast = fast
         self.slow = slow
 
-    def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+    def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
         """
         Generate trading signals based on moving average crossovers.
 
@@ -25,8 +25,8 @@ class SmaCrossoverStrategy(Strategy):
 
         Returns
         -------
-        pd.DataFrame
-            DataFrame with trading signals.
+        tuple[pd.DataFrame, pd.Series, pd.Series]
+            The DataFrame, the buy mask, and the sell mask.
         """
         
         if self.fast >= self.slow:
@@ -47,8 +47,8 @@ class SmaCrossoverStrategy(Strategy):
         buy = cross_over(fast, slow)
         sell = cross_under(fast, slow)
 
-        return self.apply_signals(df, buy, sell)
-    
+        return df, buy, sell
+
 class EmaCrossoverStrategy(Strategy):
     """
     An exponential moving average crossover strategy.
@@ -59,7 +59,7 @@ class EmaCrossoverStrategy(Strategy):
         self.fast = fast
         self.slow = slow
 
-    def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
+    def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
         """
         Generate trading signals based on exponential moving average crossovers.
 
@@ -70,8 +70,8 @@ class EmaCrossoverStrategy(Strategy):
 
         Returns
         -------
-        pd.DataFrame
-            DataFrame with trading signals.
+        tuple[pd.DataFrame, pd.Series, pd.Series]
+            The DataFrame, the buy mask, and the sell mask.
         """
         
         if self.fast >= self.slow:
@@ -92,5 +92,5 @@ class EmaCrossoverStrategy(Strategy):
         buy = cross_over(fast, slow)
         sell = cross_under(fast, slow)
 
-        return self.apply_signals(df, buy, sell)
-    
+        return df, buy, sell
+

@@ -38,7 +38,9 @@ class BacktestEngine:
 	
 	def run(self, strategy, df):
 
-		signals = strategy.generate_signals(df)
+		df, buy, sell = strategy.generate_signals(df)
+
+		signals = strategy.apply_signals(df, buy, sell)
 
 		portfolio = self._simulate(signals)
 

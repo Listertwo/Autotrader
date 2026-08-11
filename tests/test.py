@@ -1,10 +1,10 @@
 from data.downloader import get_data
-from strategies.momentum import RsiStrategy
+from strategies.momentum import MacdStrategy
 from backtest.engine import BacktestEngine
 
-df = get_data("AAPL", period="1y", interval="1h")
+df = get_data("^GSPC", period="1mo", interval="5m")
 
-strategy = RsiStrategy()
+strategy = MacdStrategy()
 
 engine = BacktestEngine()
 

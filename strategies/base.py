@@ -20,8 +20,10 @@ class Strategy(ABC):
 
         Returns
         -------
-        pd.DataFrame
-            DataFrame with trading signals.
+        tuple[pd.DataFrame, pd.Series, pd.Series]
+            The DataFrame (with any indicator columns added), the buy mask,
+            and the sell mask. The Signal column is not applied here -
+            call apply_signals once a final buy/sell mask is ready.
         """
         raise NotImplementedError("This method should be implemented by subclasses.")
     
