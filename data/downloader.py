@@ -2,6 +2,7 @@ import time
 from utils.logger import logger
 from utils.validator import validate_normalize
 from data.cache import load_cache, save_cache
+from data.normalize import normalize_dataframe
 import yfinance as yf
 import pandas as pd
 
@@ -37,7 +38,7 @@ def get_data(symbol: str, start=None, end=None, period="1y", interval="1d") -> p
  
     df = download_data(symbol, start=start, end=end, period=period, interval=interval)
     
-    #Normalize downloaded data before saving to cache
+    df = normalize_dataframe(df)
     
     if not save_cache(symbol, period, interval, df):
         logger.warning("Failed to save cache for %s", symbol)
