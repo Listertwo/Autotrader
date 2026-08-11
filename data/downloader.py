@@ -6,14 +6,14 @@ from data.normalize import normalize_DataFrame
 import yfinance as yf
 import pandas as pd
 
-def get_data(symbol: str, start=None, end=None, period="1y", interval="1d") -> pd.DataFrame:
+def get_data(symbols: List[str], start=None, end=None, period="1y", interval="1d") -> dict[str, pd.DataFrame]:
     """
     Get historical market data, either from cache or by downloading.
 
     Parameters
     ----------
-    symbol : str
-        Stock ticker (e.g. AAPL)
+    symbol : List[str]
+        Stock tickers (e.g. [AAPL, NVDA, etc.])
     start : datetime | None
         Start date
     end : datetime | None
@@ -29,21 +29,26 @@ def get_data(symbol: str, start=None, end=None, period="1y", interval="1d") -> p
         Historical OHLCV data
     """
 
-    symbol, start, end, period, interval = validate_normalize(symbol, start, end, period, interval)
-
-    df = load_cache(symbol, period, interval)
-
-    if df is not None:
-        return df
- 
-    df = download_data(symbol, start=start, end=end, period=period, interval=interval)
+    data = []
     
-    df = normalize_DataFrame(df)
+    for symbol in symbols:
+        symbol, start, end, period, interval = validate_normalize(symbol, start, end, period, interval)
     
-    if not save_cache(symbol, period, interval, df):
-        logger.warning("Failed to save cache for %s", symbol)
+        df = load_cache(symbol, period, interval)
+    
+        if df is not None:
+            return df
+     
+        df = download_data(symbol, start=start, end=end, period=period, interval=interval)
+        
+        df = normalize_DataFrame(df)
+        
+        if not save_cache(symbol, period, interval, df):
+            logger.warning("Failed to save cache for %s", symbol)
 
-    return df
+        data.append(symbol, df)
+
+    return data
 
 def download_data(symbol: str, start=None, end=None, period="1y", interval="1d") -> pd.DataFrame:
     """
