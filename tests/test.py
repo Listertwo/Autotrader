@@ -2,7 +2,9 @@ from data.downloader import get_data
 from strategies import Strategy
 from backtesting.engine import BacktestEngine
 
-df = get_data("AAPL")
+symbols = ["AAPL", "NVDA", "MSFT"]
+
+df = get_data(symbols, interval="1d", period="1y")
 
 strategy = GoldenCrossStrategy()
 
