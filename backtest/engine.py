@@ -1,5 +1,7 @@
 import pandas as pd
 
+from itertools import groupby
+
 from backtest.portfolio import Portfolio
 from models.results import BacktestResults
 from models.event import MarketEvent
@@ -15,18 +17,27 @@ class BacktestEngine:
 			self.commission
 		)
 
-		for event in events: 
-			if event.signal == 1:
-				portfolio.buy(event.date, event.price)
+		last_prices = {}
 
-			elif event.signal == -1:
-				portfolio.sell(event.date, event.price)
+		for date, date_events in groupby(events, key=lambda event: event.date):
+			date_events = list(date_events)
 
-			portfolio.snapshot(event.date, event.price)
+			for event in date_events: 
+				last_prices[event.symbol] = event.price
+				last_date = event.date
+
+				if event.signal == 1:
+					portfolio.buy(event.symbol, event.date, event.price)
+
+				elif event.signal == -1:
+					portfolio.sell(event.symbol, event.date, event.price)
+
+			portfolio.snapshot(date, last_prices)
+
 
 		portfolio.close(
-			events[-1].date,
-			events[-1].price
+			last_date,
+			last_prices
 		)
 
 		return portfolio

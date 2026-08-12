@@ -8,7 +8,7 @@ from models.trade import Trade
 class PortfolioSnapshot:
     date: pd.Timestamp
     cash: float
-    shares: float
+    positions: dict[str, dict[str, float]]
     market_value: float
     equity: float
 
@@ -19,17 +19,14 @@ class Portfolio:
 		self.cash = initial_cash
 		self.commission = commission
 
-		self.shares = 0.0
-
-		self.entry_price = None
-		self.entry_date = None
+		self.positions: dict[str, dict[str, float]] = {}
 
 		self.trades: list[Trade] = []
 		self.history: list[PortfolioSnapshot] = []
 
-	@property
-	def has_position(self) -> bool:
-		return self.shares > 0
+	#@property
+	#def has_position(self) -> bool:
+		#return self.shares > 0
 
 	@property
 	def equity(self) -> float:
@@ -38,10 +35,10 @@ class Portfolio:
 		
 		return self.cash
 
-	def buy(self, date, price) -> None:
+	def buy(self, symbol, date, price) -> None:
 		if price <= 0:
 			raise ValueError("price must me postive.")
-		if self.has_position:
+		if self.positions[symbol].get("shares", 0) > 0:
 			return
 
 		cash_after_fee = self.cash - self.commission
@@ -49,35 +46,41 @@ class Portfolio:
 		if cash_after_fee <= 0:
 			raise ValueError("Not enough cash to execute trade.")
 		
-		self.shares = cash_after_fee / price
+		shares = cash_after_fee / price
 		self.cash = 0.0
 
 		self.entry_date = date
 		self.entry_price = price
 
-	def sell(self, date, price) -> None:
+		self.positions[symbol].update({"entry_date": date, "entry_price": price, "shares": shares})
+
+	def sell(self, symbol, date, price) -> None:
 		if price <= 0:
 			raise ValueError("price must me postive.")
-		if not self.has_position:
+		if not self.positions[symbol].get("shares", 0) > 0:
 			return
 
-		self.cash = self.shares * price - self.commission
+		shares = self.positions[symbol].get("shares", 0)
+		entry_price = self.positions[symbol].get("entry_price", 0)
+		entry_date = self.positions[symbol].get("entry_date", None)
 
-		cost_basis = self.shares * self.entry_price
+		self.cash = shares * price - self.commission
+
+		cost_basis = shares * entry_price
 
 		profit = self.cash - cost_basis
 
 		return_pct = (profit / cost_basis) * 100
 		
-		holding_period = (date - self.entry_date).days
+		holding_period = (date - entry_date).days
 
 		self.trades.append(
 			Trade(
-				entry_date=self.entry_date,
+				entry_date=entry_date,
 				exit_date=date,
-				entry_price=self.entry_price,
+				entry_price=entry_price,
 				exit_price=price,
-				shares=self.shares,
+				shares=shares,
 				commission=self.commission,
 				profit=profit,
 				return_pct=return_pct,
@@ -85,27 +88,35 @@ class Portfolio:
 			)
 		)
 
-		self.shares = 0.0
+		self.positions[symbol].update({"entry_date": None, "entry_price": None, "shares": 0})
 
-		self.entry_date = None
-		self.entry_price = None
+	def close(self, date, prices: dict[str, float]) -> None:
+		for symbol, position in self.positions.items():
+			if position.get("shares", 0) > 0:
+				price = prices.get(symbol)
 
-	def close(self, date, price) -> None:
+				if price is None:
+					raise ValueError(f"Price for symbol {symbol} not provided in prices dictionary.")
 
-		if self.has_position:
-			self.sell(date, price)
+				self.sell(symbol, date, price)
 
-	def snapshot(self, date, price) -> None:
+	def snapshot(self, date, prices: dict[str, float]) -> None:
 		if price <= 0:
 			raise ValueError("price must be positive")
-		
-		market_value = self.shares * price
+
+		market_value: float = 0.0
+
+		for symbol, price in prices.items():
+			if symbol not in self.positions:
+				self.positions[symbol] = {"entry_date": None, "entry_price": None, "shares": 0}
+
+			market_value += self.positions[symbol].get("shares", 0) * price
 
 		self.history.append(
 			PortfolioSnapshot(
 				date=date,
 				cash=self.cash,
-				shares=self.shares,
+				positions=self.positions,
 				market_value=market_value,
 				equity=self.cash + market_value,
 			)
