@@ -125,3 +125,207 @@
 2026-07-16 17:29:52,969 | Autotrader | INFO | Getting cache path for AAPL_1y_1h.csv
 2026-07-16 17:29:52,969 | Autotrader | INFO | Cache file is recent for AAPL_1y_1h.csv
 2026-07-16 17:29:52,998 | Autotrader | INFO | Loaded 1740 rows.
+2026-07-18 11:53:09,484 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-18 11:53:09,504 | Autotrader | INFO | Getting cache path for AAPL_10y_1d.csv
+2026-07-18 11:53:09,504 | Autotrader | INFO | Getting cache path for AAPL_10y_1d.csv
+2026-07-18 11:53:09,504 | Autotrader | WARNING | Could not find cache file or file is not valid for AAPL_10y_1d.csv
+2026-07-18 11:53:09,504 | Autotrader | INFO | Downloading data for AAPL
+2026-07-18 11:53:13,218 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-18 11:53:13,219 | Autotrader | INFO | Downloaded 2514 rows for AAPL in 3.71 seconds
+2026-07-18 11:53:13,222 | Autotrader | INFO | Getting cache path for AAPL_10y_1d.csv
+2026-07-18 11:53:13,222 | Autotrader | INFO | Saving cache
+2026-07-18 11:53:13,251 | Autotrader | INFO | Getting cache path for AAPL_10y_1d.csv
+2026-07-18 11:53:13,251 | Autotrader | INFO | Found cache file for AAPL_10y_1d.csv
+2026-07-18 11:53:13,291 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\AAPL_10y_1d.csv (2514 rows, 239121)
+2026-07-19 17:42:44,992 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 17:42:45,006 | Autotrader | INFO | Getting cache path for AAPL_10y_1d.csv
+2026-07-19 17:42:45,006 | Autotrader | INFO | Getting cache path for AAPL_10y_1d.csv
+2026-07-19 17:42:45,007 | Autotrader | INFO | Found cache file for AAPL_10y_1d.csv
+2026-07-19 17:42:45,007 | Autotrader | INFO | Getting cache path for AAPL_10y_1d.csv
+2026-07-19 17:42:45,008 | Autotrader | WARNING | Cache file is not recent for AAPL_10y_1d.csv
+2026-07-19 17:42:45,008 | Autotrader | INFO | Downloading data for AAPL
+2026-07-19 17:42:48,824 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-19 17:42:48,825 | Autotrader | INFO | Downloaded 2514 rows for AAPL in 3.82 seconds
+2026-07-19 17:42:48,828 | Autotrader | INFO | Getting cache path for AAPL_10y_1d.csv
+2026-07-19 17:42:48,828 | Autotrader | INFO | Saving cache
+2026-07-19 17:42:48,851 | Autotrader | INFO | Getting cache path for AAPL_10y_1d.csv
+2026-07-19 17:42:48,852 | Autotrader | INFO | Found cache file for AAPL_10y_1d.csv
+2026-07-19 17:42:48,891 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\AAPL_10y_1d.csv (2514 rows, 239189)
+2026-07-19 17:47:03,221 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 17:47:03,222 | Autotrader | INFO | Getting cache path for AAPL_1d_5m.csv
+2026-07-19 17:47:03,222 | Autotrader | INFO | Getting cache path for AAPL_1d_5m.csv
+2026-07-19 17:47:03,222 | Autotrader | WARNING | Could not find cache file or file is not valid for AAPL_1d_5m.csv
+2026-07-19 17:47:03,222 | Autotrader | INFO | Downloading data for AAPL
+2026-07-19 17:47:03,923 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-19 17:47:03,924 | Autotrader | INFO | Downloaded 78 rows for AAPL in 0.70 seconds
+2026-07-19 17:47:03,926 | Autotrader | INFO | Getting cache path for AAPL_1d_5m.csv
+2026-07-19 17:47:03,927 | Autotrader | INFO | Saving cache
+2026-07-19 17:47:03,932 | Autotrader | INFO | Getting cache path for AAPL_1d_5m.csv
+2026-07-19 17:47:03,933 | Autotrader | INFO | Found cache file for AAPL_1d_5m.csv
+2026-07-19 17:47:03,950 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\AAPL_1d_5m.csv (78 rows, 8221)
+2026-07-19 17:47:03,951 | Autotrader | WARNING | Period (200) is greater than dataframe length (78)
+2026-07-19 17:48:47,254 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 17:48:47,255 | Autotrader | INFO | Getting cache path for AAPL_1d_5m.csv
+2026-07-19 17:48:47,255 | Autotrader | INFO | Getting cache path for AAPL_1d_5m.csv
+2026-07-19 17:48:47,255 | Autotrader | INFO | Found cache file for AAPL_1d_5m.csv
+2026-07-19 17:48:47,256 | Autotrader | INFO | Getting cache path for AAPL_1d_5m.csv
+2026-07-19 17:48:47,256 | Autotrader | INFO | Cache file is recent for AAPL_1d_5m.csv
+2026-07-19 17:48:47,264 | Autotrader | INFO | Loaded 78 rows.
+2026-07-19 17:57:13,604 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 17:57:13,604 | Autotrader | INFO | Getting cache path for SPCX_1y_1d.csv
+2026-07-19 17:57:13,604 | Autotrader | INFO | Getting cache path for SPCX_1y_1d.csv
+2026-07-19 17:57:13,605 | Autotrader | WARNING | Could not find cache file or file is not valid for SPCX_1y_1d.csv
+2026-07-19 17:57:13,605 | Autotrader | INFO | Downloading data for SPCX
+2026-07-19 17:57:14,573 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-19 17:57:14,573 | Autotrader | INFO | Downloaded 24 rows for SPCX in 0.97 seconds
+2026-07-19 17:57:14,576 | Autotrader | INFO | Getting cache path for SPCX_1y_1d.csv
+2026-07-19 17:57:14,576 | Autotrader | INFO | Saving cache
+2026-07-19 17:57:14,580 | Autotrader | INFO | Getting cache path for SPCX_1y_1d.csv
+2026-07-19 17:57:14,581 | Autotrader | INFO | Found cache file for SPCX_1y_1d.csv
+2026-07-19 17:57:14,592 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\SPCX_1y_1d.csv (24 rows, 2175)
+2026-07-19 17:57:14,593 | Autotrader | WARNING | Period (50) is greater than dataframe length (24)
+2026-07-19 17:57:14,594 | Autotrader | WARNING | Period (200) is greater than dataframe length (24)
+2026-07-19 17:58:14,393 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 17:58:41,348 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 17:58:41,349 | Autotrader | INFO | Getting cache path for SPCX_3mo_5m.csv
+2026-07-19 17:58:41,349 | Autotrader | INFO | Getting cache path for SPCX_3mo_5m.csv
+2026-07-19 17:58:41,349 | Autotrader | WARNING | Could not find cache file or file is not valid for SPCX_3mo_5m.csv
+2026-07-19 17:58:41,349 | Autotrader | INFO | Downloading data for SPCX
+2026-07-19 17:58:42,152 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-19 17:58:42,153 | Autotrader | INFO | Downloaded 1845 rows for SPCX in 0.80 seconds
+2026-07-19 17:58:42,155 | Autotrader | INFO | Getting cache path for SPCX_3mo_5m.csv
+2026-07-19 17:58:42,156 | Autotrader | INFO | Saving cache
+2026-07-19 17:58:42,194 | Autotrader | INFO | Getting cache path for SPCX_3mo_5m.csv
+2026-07-19 17:58:42,195 | Autotrader | INFO | Found cache file for SPCX_3mo_5m.csv
+2026-07-19 17:58:42,229 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\SPCX_3mo_5m.csv (1845 rows, 194969)
+2026-07-19 18:00:59,647 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 18:00:59,648 | Autotrader | INFO | Getting cache path for INDEXSP_10y_1d.csv
+2026-07-19 18:00:59,648 | Autotrader | INFO | Getting cache path for INDEXSP_10y_1d.csv
+2026-07-19 18:00:59,649 | Autotrader | WARNING | Could not find cache file or file is not valid for INDEXSP_10y_1d.csv
+2026-07-19 18:00:59,649 | Autotrader | INFO | Downloading data for INDEXSP
+2026-07-19 18:01:01,147 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-19 18:01:01,148 | Autotrader | INFO | Downloaded 0 rows for INDEXSP in 1.50 seconds
+2026-07-19 18:01:01,148 | Autotrader | CRITICAL | No data found for INDEXSP.
+2026-07-19 18:01:37,807 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 18:01:37,808 | Autotrader | INFO | Getting cache path for .INX_10y_1d.csv
+2026-07-19 18:01:37,808 | Autotrader | INFO | Getting cache path for .INX_10y_1d.csv
+2026-07-19 18:01:37,809 | Autotrader | WARNING | Could not find cache file or file is not valid for .INX_10y_1d.csv
+2026-07-19 18:01:37,809 | Autotrader | INFO | Downloading data for .INX
+2026-07-19 18:01:39,267 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-19 18:01:39,268 | Autotrader | INFO | Downloaded 0 rows for .INX in 1.46 seconds
+2026-07-19 18:01:39,268 | Autotrader | CRITICAL | No data found for .INX.
+2026-07-19 18:01:51,994 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 18:01:51,994 | Autotrader | INFO | Getting cache path for INX_10y_1d.csv
+2026-07-19 18:01:51,995 | Autotrader | INFO | Getting cache path for INX_10y_1d.csv
+2026-07-19 18:01:51,995 | Autotrader | WARNING | Could not find cache file or file is not valid for INX_10y_1d.csv
+2026-07-19 18:01:51,996 | Autotrader | INFO | Downloading data for INX
+2026-07-19 18:01:52,694 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-19 18:01:52,694 | Autotrader | INFO | Downloaded 0 rows for INX in 0.70 seconds
+2026-07-19 18:01:52,694 | Autotrader | CRITICAL | No data found for INX.
+2026-07-19 18:02:25,638 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 18:02:25,638 | Autotrader | INFO | Getting cache path for GSPC_10y_1d.csv
+2026-07-19 18:02:25,639 | Autotrader | INFO | Getting cache path for GSPC_10y_1d.csv
+2026-07-19 18:02:25,639 | Autotrader | WARNING | Could not find cache file or file is not valid for GSPC_10y_1d.csv
+2026-07-19 18:02:25,639 | Autotrader | INFO | Downloading data for GSPC
+2026-07-19 18:02:27,129 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-19 18:02:27,129 | Autotrader | INFO | Downloaded 0 rows for GSPC in 1.49 seconds
+2026-07-19 18:02:27,130 | Autotrader | CRITICAL | No data found for GSPC.
+2026-07-19 18:03:29,306 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-19 18:03:29,307 | Autotrader | INFO | Getting cache path for ^GSPC_10y_1d.csv
+2026-07-19 18:03:29,307 | Autotrader | INFO | Getting cache path for ^GSPC_10y_1d.csv
+2026-07-19 18:03:29,307 | Autotrader | WARNING | Could not find cache file or file is not valid for ^GSPC_10y_1d.csv
+2026-07-19 18:03:29,308 | Autotrader | INFO | Downloading data for ^GSPC
+2026-07-19 18:03:30,244 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-19 18:03:30,559 | Autotrader | INFO | Downloaded 2514 rows for ^GSPC in 1.25 seconds
+2026-07-19 18:03:30,563 | Autotrader | INFO | Getting cache path for ^GSPC_10y_1d.csv
+2026-07-19 18:03:30,563 | Autotrader | INFO | Saving cache
+2026-07-19 18:03:30,578 | Autotrader | INFO | Getting cache path for ^GSPC_10y_1d.csv
+2026-07-19 18:03:30,579 | Autotrader | INFO | Found cache file for ^GSPC_10y_1d.csv
+2026-07-19 18:03:30,597 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\^GSPC_10y_1d.csv (2514 rows, 221946)
+2026-07-21 18:34:02,674 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-21 18:34:02,693 | Autotrader | INFO | Getting cache path for ^GSPC_10y_1d.csv
+2026-07-21 18:34:02,694 | Autotrader | INFO | Getting cache path for ^GSPC_10y_1d.csv
+2026-07-21 18:34:02,695 | Autotrader | INFO | Found cache file for ^GSPC_10y_1d.csv
+2026-07-21 18:34:02,695 | Autotrader | INFO | Getting cache path for ^GSPC_10y_1d.csv
+2026-07-21 18:34:02,695 | Autotrader | WARNING | Cache file is not recent for ^GSPC_10y_1d.csv
+2026-07-21 18:34:02,695 | Autotrader | INFO | Downloading data for ^GSPC
+2026-07-21 18:34:07,390 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-21 18:34:07,391 | Autotrader | INFO | Downloaded 2512 rows for ^GSPC in 4.69 seconds
+2026-07-21 18:34:07,394 | Autotrader | INFO | Getting cache path for ^GSPC_10y_1d.csv
+2026-07-21 18:34:07,394 | Autotrader | INFO | Saving cache
+2026-07-21 18:34:07,437 | Autotrader | INFO | Getting cache path for ^GSPC_10y_1d.csv
+2026-07-21 18:34:07,438 | Autotrader | INFO | Found cache file for ^GSPC_10y_1d.csv
+2026-07-21 18:34:07,501 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\^GSPC_10y_1d.csv (2512 rows, 221773)
+2026-07-21 18:34:41,621 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-21 18:34:41,621 | Autotrader | INFO | Getting cache path for ^GSPC_1y_5m.csv
+2026-07-21 18:34:41,621 | Autotrader | INFO | Getting cache path for ^GSPC_1y_5m.csv
+2026-07-21 18:34:41,622 | Autotrader | WARNING | Could not find cache file or file is not valid for ^GSPC_1y_5m.csv
+2026-07-21 18:34:41,622 | Autotrader | INFO | Downloading data for ^GSPC
+2026-07-21 18:34:45,121 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-21 18:34:45,122 | Autotrader | INFO | Downloaded 0 rows for ^GSPC in 3.50 seconds
+2026-07-21 18:34:45,122 | Autotrader | CRITICAL | No data found for ^GSPC.
+2026-07-21 18:35:00,888 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-21 18:35:00,888 | Autotrader | INFO | Getting cache path for ^GSPC_3mo_5m.csv
+2026-07-21 18:35:00,888 | Autotrader | INFO | Getting cache path for ^GSPC_3mo_5m.csv
+2026-07-21 18:35:00,889 | Autotrader | WARNING | Could not find cache file or file is not valid for ^GSPC_3mo_5m.csv
+2026-07-21 18:35:00,889 | Autotrader | INFO | Downloading data for ^GSPC
+2026-07-21 18:35:02,167 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-21 18:35:02,168 | Autotrader | INFO | Downloaded 0 rows for ^GSPC in 1.28 seconds
+2026-07-21 18:35:02,168 | Autotrader | CRITICAL | No data found for ^GSPC.
+2026-07-21 18:35:11,667 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-21 18:35:11,667 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-21 18:35:11,668 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-21 18:35:11,668 | Autotrader | WARNING | Could not find cache file or file is not valid for ^GSPC_1mo_5m.csv
+2026-07-21 18:35:11,668 | Autotrader | INFO | Downloading data for ^GSPC
+2026-07-21 18:35:12,435 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-21 18:35:12,436 | Autotrader | INFO | Downloaded 1638 rows for ^GSPC in 0.77 seconds
+2026-07-21 18:35:12,439 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-21 18:35:12,439 | Autotrader | INFO | Saving cache
+2026-07-21 18:35:12,473 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-21 18:35:12,473 | Autotrader | INFO | Found cache file for ^GSPC_1mo_5m.csv
+2026-07-21 18:35:12,506 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\^GSPC_1mo_5m.csv (1638 rows, 162636)
+2026-07-22 18:32:09,246 | Autotrader | INFO | Downloading data for AAPL
+2026-07-22 18:32:13,313 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-22 18:32:13,313 | Autotrader | INFO | Downloaded 1254 rows for AAPL in 4.07 seconds
+2026-07-22 18:33:37,591 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-22 18:33:37,591 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:33:37,592 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:33:37,592 | Autotrader | INFO | Found cache file for ^GSPC_1mo_5m.csv
+2026-07-22 18:33:37,592 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:33:37,593 | Autotrader | INFO | Cache file is recent for ^GSPC_1mo_5m.csv
+2026-07-22 18:33:37,634 | Autotrader | INFO | Loaded 1638 rows.
+2026-07-22 18:34:36,598 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-22 18:34:36,599 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:34:36,599 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:34:36,600 | Autotrader | INFO | Found cache file for ^GSPC_1mo_5m.csv
+2026-07-22 18:34:36,600 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:34:36,601 | Autotrader | INFO | Cache file is recent for ^GSPC_1mo_5m.csv
+2026-07-22 18:34:36,633 | Autotrader | INFO | Loaded 1638 rows.
+2026-07-22 18:35:36,987 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-22 18:35:36,988 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:35:36,988 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:35:36,989 | Autotrader | INFO | Found cache file for ^GSPC_1mo_5m.csv
+2026-07-22 18:35:36,989 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:35:36,989 | Autotrader | WARNING | Cache file is not recent for ^GSPC_1mo_5m.csv
+2026-07-22 18:35:36,990 | Autotrader | INFO | Downloading data for ^GSPC
+2026-07-22 18:35:38,013 | Autotrader | INFO | Flattening MultiIndex columns
+2026-07-22 18:35:38,014 | Autotrader | INFO | Downloaded 1638 rows for ^GSPC in 1.02 seconds
+2026-07-22 18:35:38,018 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:35:38,019 | Autotrader | INFO | Saving cache
+2026-07-22 18:35:38,151 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:35:38,152 | Autotrader | INFO | Found cache file for ^GSPC_1mo_5m.csv
+2026-07-22 18:35:38,187 | Autotrader | INFO | Saved cache D:\Users\Maxwell\Documents\AutoTrader\data\cache\^GSPC_1mo_5m.csv (1638 rows, 162588)
+2026-07-22 18:36:05,197 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-22 18:36:05,197 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:36:05,198 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:36:05,198 | Autotrader | INFO | Found cache file for ^GSPC_1mo_5m.csv
+2026-07-22 18:36:05,198 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:36:05,199 | Autotrader | INFO | Cache file is recent for ^GSPC_1mo_5m.csv
+2026-07-22 18:36:05,227 | Autotrader | INFO | Loaded 1638 rows.
+2026-07-22 18:36:31,744 | Autotrader | INFO | Validating variable data. Modifying data, if necessary.
+2026-07-22 18:36:31,744 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:36:31,745 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:36:31,745 | Autotrader | INFO | Found cache file for ^GSPC_1mo_5m.csv
+2026-07-22 18:36:31,746 | Autotrader | INFO | Getting cache path for ^GSPC_1mo_5m.csv
+2026-07-22 18:36:31,746 | Autotrader | INFO | Cache file is recent for ^GSPC_1mo_5m.csv
+2026-07-22 18:36:31,774 | Autotrader | INFO | Loaded 1638 rows.
