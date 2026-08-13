@@ -62,6 +62,15 @@ class BacktestEngine:
 
 	def run(self, strategy, data: dict[str, pd.DataFrame]):
 		
+		if not isinstance(data, dict):
+			raise TypeError("data must be a dictionary")
+		else:
+			for symbol in data:
+				if not isinstance(symbol, str):
+					raise TypeError(f"symbol {symbol} must be a string")
+				if not isinstance(data[symbol], pd.DataFrame):
+					raise TypeError(f"The data for data[{symbol}] must be a pandas DataFrame")
+		
 		signals = {}
 		for symbol, df in data.items():
 			signals[symbol] = strategy.generate_signals(df)
