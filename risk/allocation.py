@@ -1,9 +1,9 @@
 
 
 class Allocator:
-	def __init__(self, target_risk: float = 0.20, min_allocation: float = 0.0, max_allocation: float = 0.25, max_volatility: float = 0.30):
-		if not isinstance(target_risk, float):
-			raise TypeError("target_risk must be a float")
+	def __init__(self, target_risk: float = 0.02, min_allocation: float = 0.0, max_allocation: float = 0.25, max_volatility: float = 0.20):
+		if not isinstance(target_risk, (int, float)):
+			raise TypeError("target_risk must be a number")
 		if target_risk <= 0:
 			raise ValueError("target_risk must be positive")
 
@@ -24,7 +24,7 @@ class Allocator:
 		if max_volatility <= 0:
 			raise ValueError("max_volatility must be positive")
 		
-		self.target_risk = target_risk
+		self.target_risk = float(target_risk)
 		self.min_allocation = min_allocation
 		self.max_allocation = max_allocation
 		self.max_volatility = max_volatility
@@ -32,13 +32,14 @@ class Allocator:
 	def calculate(self, volatility: float) -> float:
 		
 
-		if volatility > self.max_volatility:
+		if not isinstance(volatility, (int, float)):
+			raise TypeError("volatility must be a number")
+		
+		if volatility > self.max_volatility or volatility <= 0:
 			return 0.0
 		
-		allocation = self.target_risk / volatility
+		allocation = min(self.target_risk / volatility, self.max_allocation)
 
-		if allocation > self.max_allocation:
-			allocation = self.max_allocation
 		if allocation < self.min_allocation:
 			return 0.0
 
