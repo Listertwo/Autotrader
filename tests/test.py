@@ -2,7 +2,9 @@ from data.downloader import get_data
 from strategies.momentum import MacdStrategy
 from backtest.engine import BacktestEngine
 
-df = get_data("^GSPC", period="1mo", interval="5m")
+symbols = ["AAPL", "NVDA", "MSFT"]
+
+df = get_data(symbols, interval="1d", period="1y")
 
 strategy = MacdStrategy()
 
