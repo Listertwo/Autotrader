@@ -35,22 +35,29 @@ class Portfolio:
 		
 		return self.cash
 
-	def buy(self, symbol, date, price) -> None:
+	def buy(self, symbol, date, price, allocation) -> None:
+		if symbol not in self.positions:
+			self.positions[symbol] = {"entry_date": None, "entry_price": None, "shares": 0}
 		if price <= 0:
 			raise ValueError("price must me postive.")
 		if self.positions[symbol].get("shares", 0) > 0:
 			return
+
+		if self.history:
+			current_equity = self.history[-1].equity
+		else:
+			current_equity = self.cash
 
 		cash_after_fee = self.cash - self.commission
 
 		if cash_after_fee <= 0:
 			raise ValueError("Not enough cash to execute trade.")
 		
-		shares = cash_after_fee / price
-		self.cash = 0.0
-
-		self.entry_date = date
-		self.entry_price = price
+		target_value = current_equity * allocation
+		actual_value = min(target_value, cash_after_fee)
+		
+		shares = actual_value / price
+		self.cash = cash_after_fee - actual_value
 
 		self.positions[symbol].update({"entry_date": date, "entry_price": price, "shares": shares})
 
@@ -58,6 +65,8 @@ class Portfolio:
 		if price <= 0:
 			raise ValueError("price must me postive.")
 		if not self.positions[symbol].get("shares", 0) > 0:
+			return
+		if symbol not in self.positions:
 			return
 
 		shares = self.positions[symbol].get("shares", 0)
@@ -101,12 +110,11 @@ class Portfolio:
 				self.sell(symbol, date, price)
 
 	def snapshot(self, date, prices: dict[str, float]) -> None:
-		if price <= 0:
-			raise ValueError("price must be positive")
-
 		market_value: float = 0.0
 
 		for symbol, price in prices.items():
+			if price <= 0:
+				raise ValueError("price must be positive")
 			if symbol not in self.positions:
 				self.positions[symbol] = {"entry_date": None, "entry_price": None, "shares": 0}
 
