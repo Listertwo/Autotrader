@@ -43,7 +43,7 @@ class Risk:
 			returns = returns.tail(self.lookback)
 
 		if len(returns) < self.min_periods:
-			return None #Return static float for high risk investment, and still allow trade?
+			return 0.0
 		
 		vol = returns.std()
 
