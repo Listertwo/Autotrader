@@ -3,6 +3,7 @@ import pandas as pd
 from dataclasses import dataclass
 
 from models.trade import Trade
+from utils.logger import logger
 
 @dataclass
 class PortfolioSnapshot:
@@ -41,6 +42,7 @@ class Portfolio:
 		if price <= 0:
 			raise ValueError("price must me postive.")
 		if self.positions[symbol].get("shares", 0) > 0:
+			logger.debug("Ignoring BUY signal for %s on %s: position already open", symbol, date)
 			return
 
 		if self.history:
@@ -61,12 +63,19 @@ class Portfolio:
 
 		self.positions[symbol].update({"entry_date": date, "entry_price": price, "shares": shares})
 
+		if shares > 0:
+			logger.info("BUY  %s | %s | price=$%.2f | shares=%.4f | value=$%.2f | allocation=%.2f%% | cash left=$%.2f", symbol, date, price, shares, actual_value, allocation * 100, self.cash)
+		else:
+			logger.debug("No shares bought for %s on %s: allocation was %.4f", symbol, date, allocation)
+
 	def sell(self, symbol, date, price) -> None:
 		if price <= 0:
 			raise ValueError("price must me postive.")
 		if not self.positions[symbol].get("shares", 0) > 0:
+			logger.debug("Ignoring SELL signal for %s on %s: no open position", symbol, date)
 			return
 		if symbol not in self.positions:
+			logger.debug("Ignoring SELL signal for %s on %s: symbol not tracked", symbol, date)
 			return
 
 		shares = self.positions[symbol].get("shares", 0)
@@ -97,9 +106,16 @@ class Portfolio:
 			)
 		)
 
+		logger.info("SELL %s | %s | price=$%.2f | shares=%.4f | profit=$%.2f (%.2f%%) | held %d day(s) | cash=$%.2f", symbol, date, price, shares, profit, return_pct, holding_period, self.cash)
+
 		self.positions[symbol].update({"entry_date": None, "entry_price": None, "shares": 0})
 
 	def close(self, date, prices: dict[str, float]) -> None:
+		open_symbols = [symbol for symbol, position in self.positions.items() if position.get("shares", 0) > 0]
+
+		if open_symbols:
+			logger.info("Closing %d open position(s) at end of data (%s): %s", len(open_symbols), date, ", ".join(open_symbols))
+
 		for symbol, position in self.positions.items():
 			if position.get("shares", 0) > 0:
 				price = prices.get(symbol)

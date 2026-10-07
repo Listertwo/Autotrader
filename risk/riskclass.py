@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from indicators.basic import add_returns
+from utils.logger import logger
 
 class Risk:
 	def __init__(self, annualize: bool = True, trading_periods: int = 252, lookback: int | None = None):
@@ -43,6 +44,7 @@ class Risk:
 			returns = returns.tail(self.lookback)
 
 		if len(returns) < self.min_periods:
+			logger.warning("Not enough history to estimate volatility as of %s: %d return(s) available, %d required. Returning 0.0 (unknown risk).", date, len(returns), self.min_periods)
 			return 0.0
 		
 		vol = returns.std()

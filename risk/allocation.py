@@ -1,3 +1,4 @@
+from utils.logger import logger
 
 
 class Allocator:
@@ -35,12 +36,24 @@ class Allocator:
 		if not isinstance(volatility, (int, float)):
 			raise TypeError("volatility must be a number")
 		
-		if volatility > self.max_volatility or volatility <= 0:
+		if volatility <= 0:
+			logger.info("Allocation 0.0: volatility is %.4f, so there is no usable risk estimate", volatility)
+			return 0.0
+
+		if volatility > self.max_volatility:
+			logger.info("Allocation 0.0: volatility %.4f is above max_volatility %.4f", volatility, self.max_volatility)
 			return 0.0
 		
-		allocation = min(self.target_risk / volatility, self.max_allocation)
+		raw_allocation = self.target_risk / volatility
+		allocation = min(raw_allocation, self.max_allocation)
+
+		if raw_allocation > self.max_allocation:
+			logger.debug("Allocation capped at max_allocation: wanted %.2f%%, using %.2f%%", raw_allocation * 100, allocation * 100)
 
 		if allocation < self.min_allocation:
+			logger.info("Allocation 0.0: %.2f%% is below min_allocation %.2f%%", allocation * 100, self.min_allocation * 100)
 			return 0.0
+
+		logger.debug("Allocation %.2f%% (volatility=%.4f, target_risk=%.4f)", allocation * 100, volatility, self.target_risk)
 
 		return allocation

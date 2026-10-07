@@ -5,6 +5,7 @@ from itertools import groupby
 from backtest.portfolio import Portfolio
 from models.results import BacktestResults
 from models.event import MarketEvent
+from utils.logger import logger
 
 class BacktestEngine:
 	def __init__(self, initial_cash: float = 10000, commission: float = 0.0):
@@ -71,12 +72,17 @@ class BacktestEngine:
 				if not isinstance(data[symbol], pd.DataFrame):
 					raise TypeError(f"The data for data[{symbol}] must be a pandas DataFrame")
 		
+		logger.info("Starting backtest | strategy=%s | symbols=%s | initial_cash=$%.2f | commission=$%.2f", getattr(strategy, "name", type(strategy).__name__), ", ".join(data), self.initial_cash, self.commission)
+
 		signals = {}
 		for symbol, df in data.items():
 			signals[symbol] = strategy.generate_signals(df)
+			logger.info("Signals for %s: %d buy, %d sell (%d bars)", symbol, (signals[symbol]["Signal"] == 1).sum(), (signals[symbol]["Signal"] == -1).sum(), len(signals[symbol]))
 
 		events = self._build_events(signals)
 		
 		portfolio = self._simulate(events)
+
+		logger.info("Backtest finished | %d events | %s to %s | %d trade(s) | final cash=$%.2f", len(events), events[0].date if events else "n/a", events[-1].date if events else "n/a", len(portfolio.trades), portfolio.cash)
 
 		return BacktestResults.from_portfolio(portfolio)
