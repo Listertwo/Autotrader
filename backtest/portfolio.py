@@ -61,7 +61,7 @@ class Portfolio:
 		shares = actual_value / price
 		self.cash = cash_after_fee - actual_value
 
-		self.positions[symbol].update({"entry_date": date, "entry_price": price, "shares": shares})
+		self.positions[symbol].update({"entry_date": date, "entry_price": price, "shares": shares, "purchase_fee": self.commission})
 
 		if shares > 0:
 			logger.info("BUY  %s | %s | price=$%.2f | shares=%.4f | value=$%.2f | allocation=%.2f%% | cash left=$%.2f", symbol, date, price, shares, actual_value, allocation * 100, self.cash)
@@ -71,22 +71,26 @@ class Portfolio:
 	def sell(self, symbol, date, price) -> None:
 		if price <= 0:
 			raise ValueError("price must me postive.")
-		if not self.positions[symbol].get("shares", 0) > 0:
-			logger.debug("Ignoring SELL signal for %s on %s: no open position", symbol, date)
-			return
 		if symbol not in self.positions:
 			logger.debug("Ignoring SELL signal for %s on %s: symbol not tracked", symbol, date)
 			return
+		if not self.positions[symbol].get("shares", 0) > 0:
+			logger.debug("Ignoring SELL signal for %s on %s: no open position", symbol, date)
+			return
+		
 
 		shares = self.positions[symbol].get("shares", 0)
 		entry_price = self.positions[symbol].get("entry_price", 0)
 		entry_date = self.positions[symbol].get("entry_date", None)
+		purchase_fee = self.positions[symbol].get("purchase_fee", 0)
 
-		self.cash = shares * price - self.commission
+		cost_basis = shares * entry_price + purchase_fee
+		
+		proceeds = (shares * price) - self.commission
+		
+		self.cash = self.cash + proceeds
 
-		cost_basis = shares * entry_price
-
-		profit = self.cash - cost_basis
+		profit = proceeds - cost_basis
 
 		return_pct = (profit / cost_basis) * 100
 		
@@ -99,7 +103,7 @@ class Portfolio:
 				entry_price=entry_price,
 				exit_price=price,
 				shares=shares,
-				commission=self.commission,
+				commission=self.commission + purchase_fee,
 				profit=profit,
 				return_pct=return_pct,
 				holding_period=holding_period,
@@ -108,7 +112,7 @@ class Portfolio:
 
 		logger.info("SELL %s | %s | price=$%.2f | shares=%.4f | profit=$%.2f (%.2f%%) | held %d day(s) | cash=$%.2f", symbol, date, price, shares, profit, return_pct, holding_period, self.cash)
 
-		self.positions[symbol].update({"entry_date": None, "entry_price": None, "shares": 0})
+		self.positions[symbol].update({"entry_date": None, "entry_price": None, "shares": 0, "purchase_fee": 0})
 
 	def close(self, date, prices: dict[str, float]) -> None:
 		open_symbols = [symbol for symbol, position in self.positions.items() if position.get("shares", 0) > 0]
