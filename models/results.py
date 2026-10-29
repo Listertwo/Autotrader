@@ -28,7 +28,7 @@ class BacktestResults:
 		winning_trades = [
 			trade
 			for trade in trades
-			if trade.profit >= 0
+			if trade.profit > 0
 		]
 		average_win = (sum(trade.profit for trade in winning_trades) / len(winning_trades) if winning_trades else 0.0)
 
@@ -87,12 +87,15 @@ class BacktestResults:
 			profit_factor = profit_factor,
 			profit_rating = profit_rating,
 			expectancy = expectancy,
-			exposure = cls.calculate_exposure(trades),
-			recovery = cls.calculate_recovery(portfolio, trades)
+			exposure = cls.calculate_exposure(portfolio),
+			recovery = cls.calculate_recovery(portfolio)
 		)
 
 	@staticmethod
 	def calculate_cagr(portfolio: Portfolio) -> float:
+		if len(portfolio.history) < 2 or portfolio.initial_cash <= 0:
+			return 0.0
+
 		first_date = portfolio.history[0].date
 		last_date = portfolio.history[-1].date
 		years = (last_date - first_date).days / 365.25
@@ -100,16 +103,24 @@ class BacktestResults:
 		if years <= 0:
 			return 0.0
 		
-		return (portfolio.cash / portfolio.initial_cash) ** (1/years) - 1
+		return (portfolio.final_equity() / portfolio.initial_cash) ** (1/years) - 1
 
 	@staticmethod
 	def calculate_volatility(returns: pd.Series) -> float:
-		return returns.std() * (252 ** 0.5)
+		if len(returns) < 2:
+			return 0.0
+
+		std = returns.std()
+
+		return 0.0 if pd.isna(std) else std * (252 ** 0.5)
 
 	@staticmethod
 	def calculate_sharpe(returns: pd.Series) -> tuple[float, str]:
 		sqrt252 = 252 ** 0.5
 		
+		if len(returns) < 2 or pd.isna(returns.std()) or returns.std() == 0:
+			return 0.0, "N/A"
+
 		ratio = sqrt252 * returns.mean() / (returns.std())
 
 		if ratio < 1:
@@ -126,15 +137,27 @@ class BacktestResults:
 	@staticmethod
 	def calculate_sortino(returns: pd.Series) -> float:
 		sqrt252 = 252 ** 0.5
-		downside = returns[returns < 0]
 
-		return sqrt252 * (returns.mean() / downside.std())
+		if len(returns) < 2:
+			return 0.0
+
+		downside_deviation = (returns.clip(upper=0) ** 2).mean() ** 0.5
+
+		if downside_deviation == 0:
+			return 0.0
+
+		return sqrt252 * (returns.mean() / downside_deviation)
 
 	@staticmethod
 	def calculate_calmar(portfolio: Portfolio) -> float:
 		cagr = BacktestResults.calculate_cagr(portfolio)
 
-		return cagr / abs(portfolio.max_drawdown())
+		max_drawdown = abs(portfolio.max_drawdown())
+
+		if max_drawdown == 0:
+			return 0.0
+
+		return cagr / max_drawdown
 
 	@staticmethod
 	def calculate_profit(trades: list[Trade]) -> tuple[float, float, float, str]:
@@ -150,6 +173,9 @@ class BacktestResults:
 			if trade.profit < 0
 		))
 
+		if not trades:
+			return 0.0, 0.0, 0.0, "N/A"
+
 		profit_factor = gross_profit / gross_loss if gross_loss else float("inf")
 
 		if profit_factor >= 2:
@@ -162,22 +188,29 @@ class BacktestResults:
 		return gross_profit, gross_loss, profit_factor, profit_rating
 
 	@staticmethod
-	def calculate_exposure(trades: list[Trade]) -> float:
-		days_in_market = sum(
-			trade.holding_period
-			for trade in trades
-		)
+	def calculate_exposure(portfolio: Portfolio) -> float:
+		"""Average share of equity invested in positions across all snapshots."""
+		if not portfolio.history:
+			return 0.0
 
-		return days_in_market / 365 #Later implement total market day tally, possibly stored in Portfolio?
+		deployed = [
+			snapshot.market_value / snapshot.equity
+			for snapshot in portfolio.history
+			if snapshot.equity > 0
+		]
+
+		return sum(deployed) / len(deployed) if deployed else 0.0
 
 	@staticmethod
-	def calculate_recovery(portfolio: Portfolio, trades: list[Trade]) -> float:
-		net_profit = sum(
-			trade.profit
-			for trade in trades
-		)
+	def calculate_recovery(portfolio: Portfolio) -> float:
+		max_drawdown = abs(portfolio.max_drawdown())
 
-		return net_profit / portfolio.max_drawdown()
+		if max_drawdown == 0 or portfolio.initial_cash <= 0:
+			return 0.0
+
+		net_return = portfolio.final_equity() / portfolio.initial_cash - 1
+
+		return net_return / max_drawdown
 
 	def __str__(self) -> str:
 		return (

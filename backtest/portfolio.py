@@ -1,4 +1,5 @@
 import pandas as pd
+import copy
 
 from dataclasses import dataclass
 
@@ -25,22 +26,14 @@ class Portfolio:
 		self.trades: list[Trade] = []
 		self.history: list[PortfolioSnapshot] = []
 
-	#@property
-	#def has_position(self) -> bool:
-		#return self.shares > 0
-
-	@property
-	def equity(self) -> float:
-		if self.has_position:
-			raise RuntimeError("Equity depends on current market price. Use snapshot() during a simulation.")
-		
-		return self.cash
-
 	def buy(self, symbol, date, price, allocation) -> None:
 		if symbol not in self.positions:
 			self.positions[symbol] = {"entry_date": None, "entry_price": None, "shares": 0}
 		if price <= 0:
-			raise ValueError("price must me postive.")
+			raise ValueError("price must be positive.")
+		if allocation <= 0:
+			logger.debug("No shares bought for %s on %s: allocation was %.4f", symbol, date, allocation)
+			return
 		if self.positions[symbol].get("shares", 0) > 0:
 			logger.debug("Ignoring BUY signal for %s on %s: position already open", symbol, date)
 			return
@@ -65,12 +58,10 @@ class Portfolio:
 
 		if shares > 0:
 			logger.info("BUY  %s | %s | price=$%.2f | shares=%.4f | value=$%.2f | allocation=%.2f%% | cash left=$%.2f", symbol, date, price, shares, actual_value, allocation * 100, self.cash)
-		else:
-			logger.debug("No shares bought for %s on %s: allocation was %.4f", symbol, date, allocation)
 
 	def sell(self, symbol, date, price) -> None:
 		if price <= 0:
-			raise ValueError("price must me postive.")
+			raise ValueError("price must be positive.")
 		if symbol not in self.positions:
 			logger.debug("Ignoring SELL signal for %s on %s: symbol not tracked", symbol, date)
 			return
@@ -98,6 +89,7 @@ class Portfolio:
 
 		self.trades.append(
 			Trade(
+				trade_symbol=symbol,
 				entry_date=entry_date,
 				exit_date=date,
 				entry_price=entry_price,
@@ -144,7 +136,7 @@ class Portfolio:
 			PortfolioSnapshot(
 				date=date,
 				cash=self.cash,
-				positions=self.positions,
+				positions=copy.deepcopy(self.positions),
 				market_value=market_value,
 				equity=self.cash + market_value,
 			)
@@ -164,15 +156,22 @@ class Portfolio:
 		for i in range(1, len(eq))
 		]
 
+	def final_equity(self) -> float:
+		if not self.history:
+			return self.cash
+
+		return self.history[-1].equity
+
 	def drawdowns(self) -> list[float]:
-		peak = self.equity_curve()[0]
-		equity = self.equity_curve()
+		curve = self.equity_curve()
 		drawdowns = []
 
-		if not equity:
+		if not curve:
 			return []
-		
-		for equity in self.equity_curve():
+
+		peak = curve[0]
+
+		for equity in curve:
 
 			peak = max(peak, equity)
 

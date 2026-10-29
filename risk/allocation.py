@@ -2,7 +2,7 @@ from utils.logger import logger
 
 
 class Allocator:
-	def __init__(self, target_risk: float = 0.02, min_allocation: float = 0.0, max_allocation: float = 0.25, max_volatility: float = 0.20):
+	def __init__(self, target_risk: float = 0.02, min_allocation: float = 0.0, max_allocation: float = 0.25, max_volatility: float = 0.50):
 		if not isinstance(target_risk, (int, float)):
 			raise TypeError("target_risk must be a number")
 		if target_risk <= 0:

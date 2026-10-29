@@ -3,16 +3,21 @@ import pandas as pd
 from itertools import groupby
 
 from backtest.portfolio import Portfolio
+from risk.allocation import Allocator
+from risk.riskclass import Risk
 from models.results import BacktestResults
 from models.event import MarketEvent
 from utils.logger import logger
 
 class BacktestEngine:
-	def __init__(self, initial_cash: float = 10000, commission: float = 0.0):
+	def __init__(self, initial_cash: float = 10000, commission: float = 0.0, target_risk: float = 0.02, min_allocation: float = 0.0, max_allocation: float = 0.25, max_volatility: float = 0.50, annualize: bool = True, trading_periods: int = 252, lookback: int | None = None):
 		self.initial_cash = initial_cash
 		self.commission = commission
+
+		self.allocator = Allocator(target_risk=target_risk, min_allocation=min_allocation, max_allocation=max_allocation, max_volatility=max_volatility)
+		self.risk = Risk(annualize=annualize, trading_periods=trading_periods, lookback=lookback)
 		
-	def _simulate(self, events):
+	def _simulate(self, events, data):
 		portfolio = Portfolio(
 			self.initial_cash,
 			self.commission
@@ -23,15 +28,20 @@ class BacktestEngine:
 		for date, date_events in groupby(events, key=lambda event: event.date):
 			date_events = list(date_events)
 
+			#Sell Loop
 			for event in date_events: 
 				last_prices[event.symbol] = event.price
 				last_date = event.date
-
-				if event.signal == 1:
-					portfolio.buy(event.symbol, event.date, event.price)
-
-				elif event.signal == -1:
+				
+				if event.signal == -1:
 					portfolio.sell(event.symbol, event.date, event.price)
+
+			#Buy Loop
+			for event in date_events:
+				if event.signal == 1:
+					volatility = self.risk.volatility(data[event.symbol], event.date)
+					allocation = self.allocator.calculate(volatility)
+					portfolio.buy(event.symbol, event.date, event.price, allocation)
 
 			portfolio.snapshot(date, last_prices)
 
@@ -76,12 +86,13 @@ class BacktestEngine:
 
 		signals = {}
 		for symbol, df in data.items():
-			signals[symbol] = strategy.generate_signals(df)
+			df, buy, sell = strategy.generate_signals(df)
+			signals[symbol] = strategy.apply_signals(df, buy, sell)
 			logger.info("Signals for %s: %d buy, %d sell (%d bars)", symbol, (signals[symbol]["Signal"] == 1).sum(), (signals[symbol]["Signal"] == -1).sum(), len(signals[symbol]))
 
 		events = self._build_events(signals)
 		
-		portfolio = self._simulate(events)
+		portfolio = self._simulate(events, data)
 
 		logger.info("Backtest finished | %d events | %s to %s | %d trade(s) | final cash=$%.2f", len(events), events[0].date if events else "n/a", events[-1].date if events else "n/a", len(portfolio.trades), portfolio.cash)
 
