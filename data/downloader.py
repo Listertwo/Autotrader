@@ -35,7 +35,7 @@ def get_data(symbols: list[str], start=None, end=None, period="1y", interval="1d
     for symbol in symbols:
         symbol, start, end, period, interval = validate_normalize(symbol, start, end, period, interval)
     
-        df = load_cache(symbol, period, interval)
+        df = load_cache(symbol, period, interval, start, end)
     
         if df is not None:
             data[symbol] = df
@@ -45,7 +45,7 @@ def get_data(symbols: list[str], start=None, end=None, period="1y", interval="1d
         
         df = normalize_dataframe(df)
         
-        if not save_cache(symbol, period, interval, df):
+        if not save_cache(symbol, period, interval, df, start, end):
             logger.warning("Failed to save cache for %s", symbol)
 
         data[symbol] = df
@@ -81,17 +81,9 @@ def download_data(symbol: str, start=None, end=None, period="1y", interval="1d")
         logger.info("Downloading data for %s", symbol)
         df = yf.download(symbol, start=start, end=end, period=period, interval=interval)
         
-        print("Before flatten:")
-        print(type(df.columns))
-        print(df.columns)
-        
         if isinstance(df.columns, pd.MultiIndex):
             logger.info("Flattening MultiIndex columns")
             df.columns = df.columns.get_level_values(0)
-        
-        print("After flatten:")
-        print(type(df.columns))
-        print(df.columns)
 
         elapsed_time = time.perf_counter() - start_time
 

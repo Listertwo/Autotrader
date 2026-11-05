@@ -274,8 +274,10 @@ class BaseStochasticStrategy(Strategy):
 			DataFrame with the stochastic %K and %D columns added.
 		"""
 		
-		k_column = f"Stochastic_%K_{self.k_period}_Close"
-		d_column = f"Stochastic_%D_{self.d_period}_Close"
+		# These names must match what add_stochastic() creates: Stochastic_%K_<period>_<smooth>
+		# and Stochastic_%D_<period>_<smooth>. Both lines use k_period then d_period (the smoothing).
+		k_column = f"Stochastic_%K_{self.k_period}_{self.d_period}"
+		d_column = f"Stochastic_%D_{self.k_period}_{self.d_period}"
 		
 		if k_column not in df.columns or d_column not in df.columns:
 			df = add_stochastic(df, self.k_period, self.d_period)

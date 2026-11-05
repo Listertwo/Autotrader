@@ -62,6 +62,6 @@ def validate_normalize(symbol: str, start: datetime | None, end: datetime | None
             f"Expected one of: {sorted(VALID_INTERVALS)}"
             )
 
-    print(symbol, start, end, period, interval)
+    logger.debug("Validated request: symbol=%s start=%s end=%s period=%s interval=%s", symbol, start, end, period, interval)
 
     return symbol, start, end, period, interval
