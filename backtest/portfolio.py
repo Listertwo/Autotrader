@@ -46,7 +46,8 @@ class Portfolio:
 		cash_after_fee = self.cash - self.commission
 
 		if cash_after_fee <= 0:
-			raise ValueError("Not enough cash to execute trade.")
+			logger.warning("Not enough cash to cover commission for %s on %s: cash=$%.2f, commission=$%.2f", symbol, date, self.cash, self.commission)
+			return
 		
 		target_value = current_equity * allocation
 		actual_value = min(target_value, cash_after_fee)
