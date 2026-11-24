@@ -8,5 +8,9 @@ class GoldenCrossStrategy(SmaCrossoverStrategy):
 	A -1 indicates a Death Cross -> Bearish Market.
     """
 	
-	def __init__(self):
-		super().__init__(50, 200)
+	default_params = {"fast": 50, "slow": 200}
+	
+	def validate(self):
+	    super().validate()
+	    if self.params != self.default_params:
+	        raise ValueError("GoldenCrossStrategy is fixed at 50/200; use SmaCrossoverStrategy for other windows")
