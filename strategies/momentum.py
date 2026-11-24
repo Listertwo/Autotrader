@@ -13,12 +13,8 @@ class BaseRsiStrategy(Strategy):
 	
 	def validate(self):
 		period = self.params["period"]
-		if not isinstance(period, int):
+		if not isinstance(period, int) or period <= 0:
 			raise TypeError("period must be a positive integer")
-		if self.params["oversold"] >= self.params["overbought"]:
-			raise ValueError("the oversold level must be lower than the overbought level")
-		if self.params["oversold"] <= 0 or self.params["overbought"] <= 0 or self.params["period"] <= 0:
-			raise ValueError("the oversold, overbought, and period values must all be positive integers")
 
 	def _prepare_rsi(self, df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
 		"""
@@ -28,8 +24,6 @@ class BaseRsiStrategy(Strategy):
 		----------
 		df : pd.DataFrame
 			Historical market data.
-		period : int
-			The period for calculating the RSI.
 
 		Returns
 		-------
@@ -37,7 +31,7 @@ class BaseRsiStrategy(Strategy):
 			DataFrame with the RSI column added.
 		"""
 		
-		column_name = f"RSI_{self.params["period"]}_Close"
+		column_name = f"RSI_{self.params['period']}_Close"
 		
 		if column_name not in df.columns:
 			df = add_rsi(df, self.params["period"])
@@ -49,17 +43,19 @@ class RsiStrategy(BaseRsiStrategy):
 	A relative stregnth index momentum strategy.
 	"""
 
-	default_params = {**BaseRsiStartegy.default_params, "oversold": 30, "overbought": 70}
+	default_params = {**BaseRsiStrategy.default_params, "oversold": 30, "overbought": 70}
 	
 	def validate(self):
 		super().validate()
 		oversold, overbought = self.params["oversold"], self.params["overbought"]
 		if not isinstance(oversold, int) or not isinstance(overbought, int):
 			raise TypeError("oversold, and overbought must both be integers")
+		if not oversold <= overbought:
+			raise ValueError("the oversold level must be lower than the overbought level")
 		if not overbought < 100:
 			raise ValueError("overbought value must be less than 100")
 		if not 0 < oversold:
-			raise ValueError("oversold must be a positive interger greater than 0")
+			raise ValueError("oversold must be a positive integer greater than 0")
 	
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
@@ -88,18 +84,18 @@ class RsiCenterlineStrategy(BaseRsiStrategy):
 	A relative stregnth index momentum strategy based on the centerline.
 	"""
 	
-	default_params = {**BaseRsiStartegy.default_params, "buy_above": 50, "sell_below": 50}
+	default_params = {**BaseRsiStrategy.default_params, "buy_above": 50, "sell_below": 50}
 
 	def validate(self):
 		super().validate()
 		buy, sell = self.params["buy_above"], self.params["sell_below"]
 		if not isinstance(buy, int) or not isinstance(sell, int):
-			raise TypeError("but_above and sell_below must be intergers")
-		if not sell < buy:
+			raise TypeError("buy_above and sell_below must be integers")
+		if not sell <= buy:
 			raise ValueError("sell_below must be less than buy_above")
-		if not sell < 50 or not 0 < sell:
+		if not sell <= 50 or not 0 <= sell:
 			raise ValueError("sell_below must be less than the centerline and greater than 0")
-		if not 50 < buy or not buy < 100:
+		if not 50 <= buy or not buy <= 100:
 			raise ValueError("buy_above must be greater than the centerline and less than 100")
 	
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
@@ -125,17 +121,15 @@ class RsiCenterlineStrategy(BaseRsiStrategy):
 		return df, buy, sell
 
 class BaseMacdStrategy(Strategy):
-	def __init__(self, name: str, fast: int = 12, slow: int = 26, signal: int = 9):
-		super().__init__(name)
-		self.fast = fast
-		self.slow = slow
-		self.signal = signal
+	default_params = {"fast": 12, "slow": 26, "signal": 9}
 
-		if not isinstance(self.fast, int) or not isinstance(self.slow, int) or not isinstance(self.signal, int):
+	def validate(self):
+		fast, slow, signal = self.params["fast"], self.params["slow"], self.params["signal"]
+		if not isinstance(fast, int) or not isinstance(slow, int) or not isinstance(signal, int):
 			raise TypeError("fast, slow, and signal must all be positive integers")
-		if self.fast <= 0 or self.slow <= 0 or self.signal <= 0:
+		if fast <= 0 or slow <= 0 or signal <= 0:
 			raise ValueError("fast, slow, and signal must all be positive integers")
-		if self.fast >= self.slow:
+		if fast >= slow:
 			raise ValueError("the fast period must be lower than the slow period")
 	
 	def _prepare_macd(self, df: pd.DataFrame) -> tuple[pd.DataFrame, str, str, str]:
@@ -158,22 +152,21 @@ class BaseMacdStrategy(Strategy):
 		pd.DataFrame
 			DataFrame with the MACD and signal columns added.
 		"""
+
+		fast, slow, signal = self.params["fast"], self.params["slow"], self.params["signal"]
 		
-		macd_column = f"MACD_f{self.fast}_s{self.slow}_g{self.signal}_Close"
-		signal_column = f"MACD_Signal_f{self.fast}_s{self.slow}_g{self.signal}_Close"
-		histogram_column = f"MACD_Histogram_f{self.fast}_s{self.slow}_g{self.signal}_Close"
+		macd_column = f"MACD_f{fast}_s{slow}_g{signal}_Close"
+		signal_column = f"MACD_Signal_f{fast}_s{slow}_g{signal}_Close"
+		histogram_column = f"MACD_Histogram_f{fast}_s{slow}_g{signal}_Close"
 		
 		if macd_column not in df.columns or signal_column not in df.columns or histogram_column not in df.columns:
-			df = add_macd(df, self.fast, self.slow, self.signal)
+			df = add_macd(df, fast, slow, signal)
 		return df, macd_column, signal_column, histogram_column
 
 class MacdStrategy(BaseMacdStrategy):
 	"""
 	A moving average convergence divergence momentum strategy.
 	"""
-
-	def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
-		super().__init__("MACD", fast, slow, signal)
 
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
@@ -202,9 +195,6 @@ class MacdZeroLineStrategy(BaseMacdStrategy):
 	A moving average convergence divergence momentum strategy based on the zero line.
 	"""
 
-	def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
-		super().__init__("MACDZeroLine", fast, slow, signal)
-
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
 		Generate trading signals based on moving average convergence divergence momentum based on the zero line.
@@ -231,9 +221,6 @@ class MacdHistogramStrategy(BaseMacdStrategy):
 	"""
 	A moving average convergence divergence momentum strategy based on the histogram.
 	"""
-
-	def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
-		super().__init__("MACDHistogram", fast, slow, signal)
 
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
@@ -262,14 +249,13 @@ class BaseStochasticStrategy(Strategy):
 	A base class for stochastic momentum strategies.
 	"""
 
-	def __init__(self, name: str, k_period: int = 14, d_period: int = 3):
-		super().__init__(name)
-		self.k_period = k_period
-		self.d_period = d_period
-
-		if not isinstance(self.k_period, int) or not isinstance(self.d_period, int):
+	default_params = {"k_period": 14, "d_period": 3}
+	
+	def validate(self):
+		k_period, d_period = self.params["k_period"], self.params["d_period"]
+		if not isinstance(k_period, int) or not isinstance(d_period, int):
 			raise TypeError("k_period and d_period must both be positive integers")
-		if self.k_period <= 0 or self.d_period <= 0:
+		if k_period <= 0 or d_period <= 0:
 			raise ValueError("k_period and d_period must both be positive integers")
 
 	def _prepare_stochastic(self, df: pd.DataFrame) -> tuple[pd.DataFrame, str, str]:
@@ -290,22 +276,21 @@ class BaseStochasticStrategy(Strategy):
 		pd.DataFrame
 			DataFrame with the stochastic %K and %D columns added.
 		"""
+
+		k_period, d_period = self.params["k_period"], self.params["d_period"]
 		
-		k_column = f"Stochastic_%K_{self.k_period}_Close"
-		d_column = f"Stochastic_%D_{self.d_period}_Close"
+		k_column = f"Stochastic_%K_{k_period}_Close"
+		d_column = f"Stochastic_%D_{d_period}_Close"
 		
 		if k_column not in df.columns or d_column not in df.columns:
-			df = add_stochastic(df, self.k_period, self.d_period)
+			df = add_stochastic(df, k_period, d_period)
 		return df, k_column, d_column
 
 class StochasticStrategy(BaseStochasticStrategy):
 	"""
 	A stochastic momentum strategy.
 	"""
-
-	def __init__(self, k_period: int = 14, d_period: int = 3):
-		super().__init__("Stochastic", k_period, d_period)
-
+	
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
 		Generate trading signals based on stochastic momentum.
@@ -333,16 +318,16 @@ class StochasticLevelStrategy(BaseStochasticStrategy):
 	A stochastic momentum strategy based on the overbought and oversold levels.
 	"""
 
-	def __init__(self, k_period: int = 14, d_period: int = 3, oversold: int = 20, overbought: int = 80):
-		super().__init__("StochasticLevel", k_period, d_period)
-		self.oversold = oversold
-		self.overbought = overbought
-
-		if not isinstance(self.overbought, int) or not isinstance(self.oversold, int):
+	default_params = {**BaseStochasticStrategy.default_params, "oversold": 20, "overbought": 80}
+	
+	def validate(self):
+		super().validate()
+		oversold, overbought = self.params["oversold"], self.params["overbought"]
+		if not isinstance(overbought, int) or not isinstance(oversold, int):
 			raise TypeError("oversold and overbought parameters must be integers")
-		if self.oversold >= self.overbought:
+		if oversold >= overbought:
 			raise ValueError("the oversold level must be lower than the overbought level")
-		if self.oversold <= 0 or self.overbought <= 0:
+		if oversold <= 0 or overbought <= 0:
 			raise ValueError("the oversold and overbought values must be positive integers")
 
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
@@ -359,11 +344,12 @@ class StochasticLevelStrategy(BaseStochasticStrategy):
 		tuple[pd.DataFrame, pd.Series, pd.Series]
 			The DataFrame, the buy mask, and the sell mask.
 		"""
-
+		
+		oversold, overbought = self.params["oversold"], self.params["overbought"]
 		df, k, d = self._prepare_stochastic(df)
 
-		buy = cross_over_level(df[k], self.oversold)
-		sell = cross_under_level(df[k], self.overbought)
+		buy = cross_over_level(df[k], oversold)
+		sell = cross_under_level(df[k], overbought)
 
 		return df, buy, sell
 	
@@ -371,9 +357,6 @@ class StochasticFilteredStrategy(BaseStochasticStrategy):
 	"""
 	A stochastic momentum strategy filtered by the %D line.
 	"""
-
-	def __init__(self, k_period: int = 14, d_period: int = 3):
-		super().__init__("StochasticFiltered", k_period, d_period)
 
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
@@ -401,9 +384,19 @@ class StochasticCenterlineStrategy(BaseStochasticStrategy):
 	"""
 	A stochastic momentum strategy based on the centerline.
 	"""
+	default_params = {**BaseStochasticStrategy.default_params, "buy_above": 50, "sell_below": 50}
 
-	def __init__(self, k_period: int = 14, d_period: int = 3):
-		super().__init__("StochasticCenterline", k_period, d_period)
+	def validate():
+		super().validate()
+		buy, sell = self.params["buy_above"], self.params["sell_below"]
+		if not isinstance(buy, int) or not isinstance(sell, int):
+			raise TypeError("buy_above and sell_below must be integers")
+		if not sell <= buy:
+			raise ValueError("sell_below must be less than buy_above")
+		if not sell <= 50 or not 0 <= sell:
+			raise ValueError("sell_below must be less than the centerline and greater than 0")
+		if not 50 <= buy or not buy <= 100:
+			raise ValueError("buy_above must be greater than the centerline and less than 100")
 
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
@@ -422,7 +415,7 @@ class StochasticCenterlineStrategy(BaseStochasticStrategy):
 
 		df, k, d = self._prepare_stochastic(df)
 
-		buy = cross_over_level(df[k], 50)
-		sell = cross_under_level(df[k], 50)
+		buy = cross_over_level(df[k], self.params["buy_above"])
+		sell = cross_under_level(df[k], self.params["sell_below"])
 
 		return df, buy, sell
