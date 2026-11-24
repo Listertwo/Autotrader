@@ -8,6 +8,11 @@ class Strategy(ABC):
     def __init__(self, name: str):
         self.name = name
 
+    @property
+    def label(self) -> str:
+        args = ",".join(str(v) for v in self.params.values())
+        return f"{type(self).__name__}({args})"
+    
     @abstractmethod
     def generate_signals(self, df):
         """
