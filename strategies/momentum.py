@@ -9,17 +9,15 @@ class BaseRsiStrategy(Strategy):
 	A relative strength index momentum strategy.
 	"""
 
-	def __init__(self, name: str, period: int = 14, oversold: int = 30, overbought: int = 70):
-		super().__init__(name)
-		self.period = period
-		self.oversold = oversold
-		self.overbought = overbought
-
-		if not isinstance(self.period, int) or not isinstance(self.oversold, int) or not isinstance(self.overbought, int):
-			raise TypeError("period, oversold, and overbought must all be positive integers")
-		if self.oversold >= self.overbought:
+	default_params = {"period": 14}
+	
+	def validate(self):
+		period = self.params["period"]
+		if not isinstance(period, int):
+			raise TypeError("period must be a positive integer")
+		if self.params["oversold"] >= self.params["overbought"]:
 			raise ValueError("the oversold level must be lower than the overbought level")
-		if self.oversold <= 0 or self.overbought <= 0 or self.period <= 0:
+		if self.params["oversold"] <= 0 or self.params["overbought"] <= 0 or self.params["period"] <= 0:
 			raise ValueError("the oversold, overbought, and period values must all be positive integers")
 
 	def _prepare_rsi(self, df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
@@ -39,10 +37,10 @@ class BaseRsiStrategy(Strategy):
 			DataFrame with the RSI column added.
 		"""
 		
-		column_name = f"RSI_{self.period}_Close"
+		column_name = f"RSI_{self.params["period"]}_Close"
 		
 		if column_name not in df.columns:
-			df = add_rsi(df, self.period)
+			df = add_rsi(df, self.params["period"])
 		
 		return df, column_name
 
@@ -51,9 +49,18 @@ class RsiStrategy(BaseRsiStrategy):
 	A relative stregnth index momentum strategy.
 	"""
 
-	def __init__(self, period=14, oversold=30, overbought=70):
-		super().__init__("RSI", period, oversold, overbought)
-
+	default_params = {**BaseRsiStartegy.default_params, "oversold": 30, "overbought": 70}
+	
+	def validate(self):
+		super().validate()
+		oversold, overbought = self.params["oversold"], self.params["overbought"]
+		if not isinstance(oversold, int) or not isinstance(overbought, int):
+			raise TypeError("oversold, and overbought must both be integers")
+		if not overbought < 100:
+			raise ValueError("overbought value must be less than 100")
+		if not 0 < oversold:
+			raise ValueError("oversold must be a positive interger greater than 0")
+	
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
         Generate trading signals based on strength index momentum.
@@ -71,8 +78,8 @@ class RsiStrategy(BaseRsiStrategy):
 
 		df, column_name = self._prepare_rsi(df)
 
-		buy = cross_over_level(df[column_name], self.oversold)
-		sell = cross_under_level(df[column_name], self.overbought)
+		buy = cross_over_level(df[column_name], self.params["oversold"])
+		sell = cross_under_level(df[column_name], self.params["overbought"])
 
 		return df, buy, sell
 
@@ -80,11 +87,21 @@ class RsiCenterlineStrategy(BaseRsiStrategy):
 	"""
 	A relative stregnth index momentum strategy based on the centerline.
 	"""
-	def __init__(self, period: int = 14):
-		super().__init__("RSICenterline")
-		self.period = period
-		self.level = 50
+	
+	default_params = {**BaseRsiStartegy.default_params, "buy_above": 50, "sell_below": 50}
 
+	def validate(self):
+		super().validate()
+		buy, sell = self.params["buy_above"], self.params["sell_below"]
+		if not isinstance(buy, int) or not isinstance(sell, int):
+			raise TypeError("but_above and sell_below must be intergers")
+		if not sell < buy:
+			raise ValueError("sell_below must be less than buy_above")
+		if not sell < 50 or not 0 < sell:
+			raise ValueError("sell_below must be less than the centerline and greater than 0")
+		if not 50 < buy or not buy < 100:
+			raise ValueError("buy_above must be greater than the centerline and less than 100")
+	
 	def generate_signals(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
 		"""
         Generate trading signals based on strength index momentum based on the centerline.
@@ -102,8 +119,8 @@ class RsiCenterlineStrategy(BaseRsiStrategy):
 
 		df, column_name = self._prepare_rsi(df)
 		
-		buy = cross_over_level(df[column_name], self.level)
-		sell = cross_under_level(df[column_name], self.level)
+		buy = cross_over_level(df[column_name], self.params["buy_above"])
+		sell = cross_under_level(df[column_name], self.params["sell_below"])
 
 		return df, buy, sell
 
