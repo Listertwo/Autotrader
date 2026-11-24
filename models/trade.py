@@ -10,6 +10,9 @@ class Trade:
         	f"Profit ${self.profit:.2f} ({self.return_pct:.2f}%)"
 		)
 	
+	strategy: str
+	symbol: str
+	
 	entry_date: Timestamp
 	exit_date: Timestamp
 
