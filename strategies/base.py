@@ -5,6 +5,8 @@ class Strategy(ABC):
     Base class for trading strategies.
     """
 
+    default_params: dict = {}
+
     def __init__(self, **params):
         unknown = set(params) - set(self.default_params)
         if unknown:

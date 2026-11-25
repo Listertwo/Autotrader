@@ -26,7 +26,7 @@ class Portfolio:
 		self.trades: list[Trade] = []
 		self.history: list[PortfolioSnapshot] = []
 
-	def buy(self, symbol, date, price, allocation) -> None:
+	def buy(self, symbol, date, price, allocation, strategy: str = "") -> None:
 		if symbol not in self.positions:
 			self.positions[symbol] = {"entry_date": None, "entry_price": None, "shares": 0}
 		if price <= 0:
@@ -55,7 +55,7 @@ class Portfolio:
 		shares = actual_value / price
 		self.cash = cash_after_fee - actual_value
 
-		self.positions[symbol].update({"entry_date": date, "entry_price": price, "shares": shares, "purchase_fee": self.commission})
+		self.positions[symbol].update({"entry_date": date, "entry_price": price, "shares": shares, "purchase_fee": self.commission, "strategy": strategy})
 
 		if shares > 0:
 			logger.info("BUY  %s | %s | price=$%.2f | shares=%.4f | value=$%.2f | allocation=%.2f%% | cash left=$%.2f", symbol, date, price, shares, actual_value, allocation * 100, self.cash)
@@ -75,6 +75,7 @@ class Portfolio:
 		entry_price = self.positions[symbol].get("entry_price", 0)
 		entry_date = self.positions[symbol].get("entry_date", None)
 		purchase_fee = self.positions[symbol].get("purchase_fee", 0)
+		strategy = self.positions[symbol].get("strategy", "")
 
 		cost_basis = shares * entry_price + purchase_fee
 		
@@ -90,7 +91,8 @@ class Portfolio:
 
 		self.trades.append(
 			Trade(
-				trade_symbol=symbol,
+				strategy=strategy,
+				symbol=symbol,
 				entry_date=entry_date,
 				exit_date=date,
 				entry_price=entry_price,
@@ -105,7 +107,7 @@ class Portfolio:
 
 		logger.info("SELL %s | %s | price=$%.2f | shares=%.4f | profit=$%.2f (%.2f%%) | held %d day(s) | cash=$%.2f", symbol, date, price, shares, profit, return_pct, holding_period, self.cash)
 
-		self.positions[symbol].update({"entry_date": None, "entry_price": None, "shares": 0, "purchase_fee": 0})
+		self.positions[symbol].update({"entry_date": None, "entry_price": None, "shares": 0, "purchase_fee": 0, "strategy": None})
 
 	def close(self, date, prices: dict[str, float]) -> None:
 		open_symbols = [symbol for symbol, position in self.positions.items() if position.get("shares", 0) > 0]

@@ -279,8 +279,8 @@ class BaseStochasticStrategy(Strategy):
 
 		k_period, d_period = self.params["k_period"], self.params["d_period"]
 		
-		k_column = f"Stochastic_%K_{k_period}_Close"
-		d_column = f"Stochastic_%D_{d_period}_Close"
+		k_column = f"Stochastic_%K_{k_period}_{d_period}"
+		d_column = f"Stochastic_%D_{k_period}_{d_period}"
 		
 		if k_column not in df.columns or d_column not in df.columns:
 			df = add_stochastic(df, k_period, d_period)
@@ -386,7 +386,7 @@ class StochasticCenterlineStrategy(BaseStochasticStrategy):
 	"""
 	default_params = {**BaseStochasticStrategy.default_params, "buy_above": 50, "sell_below": 50}
 
-	def validate():
+	def validate(self):
 		super().validate()
 		buy, sell = self.params["buy_above"], self.params["sell_below"]
 		if not isinstance(buy, int) or not isinstance(sell, int):

@@ -67,7 +67,7 @@ def test_round_trip_profit_no_fee():
     p.buy("AAA", D0, 100.0, 0.50)          # 50 shares
     p.sell("AAA", D1, 110.0)
     t = p.trades[0]
-    assert t.trade_symbol == "AAA"
+    assert t.symbol == "AAA"
     assert abs(t.profit - 500.0) < 1e-9
     assert abs(t.return_pct - 10.0) < 1e-9
     assert t.holding_period == 3

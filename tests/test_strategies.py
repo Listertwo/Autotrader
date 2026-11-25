@@ -14,14 +14,14 @@ from strategies.momentum import (
 from strategies.trend import GoldenCrossStrategy
 
 STRATEGIES = {
-    "SMA 10/30": lambda: SmaCrossoverStrategy(10, 30),
-    "SMA 20/50": lambda: SmaCrossoverStrategy(20, 50),
-    "EMA 10/30": lambda: EmaCrossoverStrategy(10, 30),
+    "SMA 10/30": lambda: SmaCrossoverStrategy(fast=10, slow=30),
+    "SMA 20/50": lambda: SmaCrossoverStrategy(fast=20, slow=50),
+    "EMA 10/30": lambda: EmaCrossoverStrategy(fast=10, slow=30),
     "RSI default": lambda: RsiStrategy(),
-    "RSI 7 (20/80)": lambda: RsiStrategy(7, 20, 80),
+    "RSI 7 (20/80)": lambda: RsiStrategy(period=7, oversold=20, overbought=80),
     "RSI centerline": lambda: RsiCenterlineStrategy(),
     "MACD": lambda: MacdStrategy(),
-    "MACD fast (8/17/9)": lambda: MacdStrategy(8, 17, 9),
+    "MACD fast (8/17/9)": lambda: MacdStrategy(fast=8, slow=17, signal=9),
     "MACD zero-line": lambda: MacdZeroLineStrategy(),
     "MACD histogram": lambda: MacdHistogramStrategy(),
     "Stochastic": lambda: StochasticStrategy(),
@@ -88,7 +88,7 @@ def test_stochastic_columns_match_the_indicator():
     data = make_prices(seed=11, bars=400)
     for k_period, d_period in [(14, 3), (9, 5), (5, 2)]:
         for cls in (StochasticStrategy, StochasticLevelStrategy, StochasticFilteredStrategy, StochasticCenterlineStrategy):
-            df, buy, sell = cls(k_period, d_period).generate_signals(data.copy())
+            df, buy, sell = cls(k_period=k_period, d_period=d_period).generate_signals(data.copy())
             assert f"Stochastic_%K_{k_period}_{d_period}" in df.columns, (cls.__name__, k_period, d_period)
             assert len(buy) == len(df) == len(sell)
 

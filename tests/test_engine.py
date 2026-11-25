@@ -16,7 +16,7 @@ from strategies.momentum import MacdStrategy
 class ScriptedStrategy(Strategy):
     """Fires exactly the signals you give it: {bar_number: 1 or -1}. Makes tests predictable."""
     def __init__(self, script):
-        super().__init__("Scripted")
+        super().__init__()
         self.script = script
 
     def generate_signals(self, df):
@@ -126,7 +126,7 @@ def test_max_allocation_respected():
 def test_higher_volatility_symbol_gets_smaller_position():
     data = {"CALM": make_prices(seed=1, daily_vol=0.005), "WILD": make_prices(seed=1, daily_vol=0.02)}
     _, p = run_engine(ScriptedStrategy({60: 1, 100: -1}), data, max_allocation=1.0, max_volatility=5.0, target_risk=0.02)
-    value = {t.trade_symbol: t.shares * t.entry_price for t in p.trades}
+    value = {t.symbol: t.shares * t.entry_price for t in p.trades}
     assert value["CALM"] > value["WILD"]
 
 
@@ -147,8 +147,6 @@ def test_sells_processed_before_buys_on_same_day():
     data = {"B": make_prices(seed=2), "A": make_prices(seed=1)}
 
     class Script(Strategy):
-        def __init__(self):
-            super().__init__("Script")
         def generate_signals(self, df):
             buy = pd.Series(False, index=df.index); sell = pd.Series(False, index=df.index)
             is_a = df["Close"].equals(data["A"]["Close"])
@@ -159,7 +157,7 @@ def test_sells_processed_before_buys_on_same_day():
             return df.copy(), buy, sell
 
     _, p = run_engine(Script(), data, max_allocation=1.0, target_risk=5.0, max_volatility=5.0)
-    b = [t for t in p.trades if t.trade_symbol == "B"][0]
+    b = [t for t in p.trades if t.symbol == "B"][0]
     equity_before = [s.equity for s in p.history if s.date < b.entry_date][-1]
     assert b.shares * b.entry_price > 0.9 * equity_before, "B was starved of cash: sells must run before buys"
 
