@@ -18,39 +18,40 @@ class BacktestEngine:
 		self.allocator = Allocator(target_risk=target_risk, min_allocation=min_allocation, max_allocation=max_allocation, max_volatility=max_volatility)
 		self.risk = Risk(annualize=annualize, trading_periods=trading_periods, lookback=lookback)
 		
-	def _simulate(self, events, data):
+	def _simulate(self, events, data, label):
 		portfolio = Portfolio(
 			self.initial_cash,
 			self.commission
 		)
 
 		last_prices = {}
+		last_date = None
 
 		for date, date_events in groupby(events, key=lambda event: event.date):
 			date_events = list(date_events)
 
 			#Sell Loop
 			for event in date_events: 
-				last_prices[event.symbol] = event.price
-				last_date = event.date
-				
 				if event.signal == -1:
 					portfolio.sell(event.symbol, event.date, self._fill_price(event.open, "sell"))
+				last_prices[event.symbol] = event.close
 
 			#Buy Loop
 			for event in date_events:
 				if event.signal == 1:
-					volatility = self.risk.volatility(data[event.symbol], self._fill_price(event.open, "buy"))
+					volatility = self.risk.volatility(data[event.symbol], event.date)
 					allocation = self.allocator.calculate(volatility)
-					portfolio.buy(event.symbol, event.date, event.price, allocation)
-
+					portfolio.buy(event.symbol, event.date, self._fill_price(event.open, "buy"), allocation, label)
+				last_prices[event.symbol] = event.close
+			
 			portfolio.snapshot(date, last_prices)
+			last_date = date
 
-
-		portfolio.close(
-			last_date,
-			last_prices
-		)
+		if last_date is not None:
+			portfolio.close(
+				last_date,
+				last_prices
+			)
 
 		return portfolio
 
@@ -58,15 +59,19 @@ class BacktestEngine:
 		events = []
 
 		for symbol, df in signals.items():
+			pending = df["Signal"].shift(1, fill_value=0)
+			
+			if df["Signal"].iloc[-1] != 0:
+				logger.info("Dropping %s signal on the last bar (%s): no next open to fill at", symbol, df.index[-1])
+			
 			for index, row in df.iterrows():
-				pending = df["Signal"].shift(1, fill_value=0)
 				events.append(
 					MarketEvent(
 						date = index,
 						symbol = symbol,
 						close = row["Close"],
-						open = row["Open"]
-						signal = row["Signal"]
+						open = row["Open"],
+						signal = int(pending.loc[index])
 					)
 				)
 
@@ -91,7 +96,7 @@ class BacktestEngine:
 				if not isinstance(data[symbol], pd.DataFrame):
 					raise TypeError(f"The data for data[{symbol}] must be a pandas DataFrame")
 		
-		logger.info("Starting backtest | strategy=%s | symbols=%s | initial_cash=$%.2f | commission=$%.2f", getattr(strategy, "name", type(strategy).__name__), ", ".join(data), self.initial_cash, self.commission)
+		logger.info("Starting backtest | strategy=%s | symbols=%s | initial_cash=$%.2f | commission=$%.2f", strategy.label, ", ".join(data), self.initial_cash, self.commission)
 
 		signals = {}
 		for symbol, df in data.items():
@@ -101,7 +106,7 @@ class BacktestEngine:
 
 		events = self._build_events(signals)
 		
-		portfolio = self._simulate(events, data)
+		portfolio = self._simulate(events, data, strategy.label)
 
 		logger.info("Backtest finished | %d events | %s to %s | %d trade(s) | final cash=$%.2f", len(events), events[0].date if events else "n/a", events[-1].date if events else "n/a", len(portfolio.trades), portfolio.cash)
 
