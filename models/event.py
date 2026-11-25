@@ -5,5 +5,6 @@ import pandas as pd
 class MarketEvent:
 	date: pd.Timestamp
 	symbol: str
-	price: float
+	open: float
+	close: float
 	signal: int

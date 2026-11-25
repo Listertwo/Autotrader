@@ -6,7 +6,7 @@ class Strategy(ABC):
     """
 
     default_params: dict = {}
-
+    
     def __init__(self, **params):
         unknown = set(params) - set(self.default_params)
         if unknown:
