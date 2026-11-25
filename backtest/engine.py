@@ -85,8 +85,20 @@ class BacktestEngine:
 			return open * (1 + slip)
 		return open * (1 - slip)
 
-	def run(self, strategy, data: dict[str, pd.DataFrame]):
-		
+	def _index_assignments(self, assignments, data):
+		by_symbol = {}
+		rank = {}
+		for i, a in enumerate(assignments):
+			for j, symbol in enumerate(a.symbols):
+				if symbol in by_symbol:
+					raise ValueError(f"{symbol} is assigned to more than one strategy")
+				if symbol not in data:
+					raise ValueError(f"no data for {symbol} ({a.strategy.label})")
+				by_symbol[symbol] = a.strategy
+				rank[symbol] = (i, j)
+		return by_symbol, rank
+
+	def run(self, assignments, data: dict[str, pd.DataFrame]):
 		if not isinstance(data, dict):
 			raise TypeError("data must be a dictionary")
 		else:
@@ -97,6 +109,8 @@ class BacktestEngine:
 					raise TypeError(f"The data for data[{symbol}] must be a pandas DataFrame")
 		
 		logger.info("Starting backtest | strategy=%s | symbols=%s | initial_cash=$%.2f | commission=$%.2f", strategy.label, ", ".join(data), self.initial_cash, self.commission)
+
+		by_symbol, rank = self._index_assignments(assignments, data)
 
 		signals = {}
 		for symbol, df in data.items():
