@@ -10,9 +10,10 @@ from models.event import MarketEvent
 from utils.logger import logger
 
 class BacktestEngine:
-	def __init__(self, initial_cash: float = 10000, commission: float = 0.0, target_risk: float = 0.02, min_allocation: float = 0.0, max_allocation: float = 0.25, max_volatility: float = 0.50, annualize: bool = True, trading_periods: int = 252, lookback: int | None = None):
+	def __init__(self, initial_cash: float = 10000, commission: float = 0.0, slippage_bps: float = 0.0, target_risk: float = 0.02, min_allocation: float = 0.0, max_allocation: float = 0.25, max_volatility: float = 0.50, annualize: bool = True, trading_periods: int = 252, lookback: int | None = None):
 		self.initial_cash = initial_cash
 		self.commission = commission
+		self.slippage_bps = slippage_bps
 
 		self.allocator = Allocator(target_risk=target_risk, min_allocation=min_allocation, max_allocation=max_allocation, max_volatility=max_volatility)
 		self.risk = Risk(annualize=annualize, trading_periods=trading_periods, lookback=lookback)
@@ -34,12 +35,12 @@ class BacktestEngine:
 				last_date = event.date
 				
 				if event.signal == -1:
-					portfolio.sell(event.symbol, event.date, event.price)
+					portfolio.sell(event.symbol, event.date, self._fill_price(event.open, "sell"))
 
 			#Buy Loop
 			for event in date_events:
 				if event.signal == 1:
-					volatility = self.risk.volatility(data[event.symbol], event.date)
+					volatility = self.risk.volatility(data[event.symbol], self._fill_price(event.open, "buy"))
 					allocation = self.allocator.calculate(volatility)
 					portfolio.buy(event.symbol, event.date, event.price, allocation)
 
@@ -58,11 +59,13 @@ class BacktestEngine:
 
 		for symbol, df in signals.items():
 			for index, row in df.iterrows():
+				pending = df["Signal"].shift(1, fill_value=0)
 				events.append(
 					MarketEvent(
 						date = index,
 						symbol = symbol,
-						price = row["Close"],
+						close = row["Close"],
+						open = row["Open"]
 						signal = row["Signal"]
 					)
 				)
@@ -70,6 +73,12 @@ class BacktestEngine:
 		events.sort(key=lambda event: event.date)
 
 		return events
+
+	def _fill_price(self, open: float, side: str) -> float:
+		slip = self.slippage_bps / 10000
+		if side == "buy":
+			return open * (1 + slip)
+		return open * (1 - slip)
 
 	def run(self, strategy, data: dict[str, pd.DataFrame]):
 		
