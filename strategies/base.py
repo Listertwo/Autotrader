@@ -5,9 +5,21 @@ class Strategy(ABC):
     Base class for trading strategies.
     """
 
-    def __init__(self, name: str):
-        self.name = name
+    def __init__(self, **params):
+        unknown = set(params) - set(self.default_params)
+        if unknown:
+            raise ValueError(f"{type(self).__name__}: unknown params {sorted(unknown)}")
+        self.params = {**self.default_params, **params}
+        self.validate()
 
+    def validate(self):
+        """Override to check parameter combinations"""
+    
+    @property
+    def label(self) -> str:
+        args = ",".join(str(v) for v in self.params.values())
+        return f"{type(self).__name__}({args})"
+    
     @abstractmethod
     def generate_signals(self, df):
         """
