@@ -35,7 +35,6 @@ class BacktestEngine:
 			for event in date_events: 
 				if event.signal == -1:
 					portfolio.sell(event.symbol, event.date, self._fill_price(event.open, "sell"))
-				last_prices[event.symbol] = event.close
 
 			buys = [event for event in date_events if event.signal == 1]
 			buys.sort(key=lambda event: rank[event.symbol])
@@ -106,6 +105,8 @@ class BacktestEngine:
 		return by_symbol, rank
 
 	def run(self, assignments: list[Assignment], data: dict[str, pd.DataFrame]):
+		if not isinstance(assignments, list) or not all(isinstance(a, Assignment) for a in assignments):
+			raise TypeError("assignments must be a list of Assignment(strategy, list[symbols])")
 		if not isinstance(data, dict):
 			raise TypeError("data must be a dictionary")
 		else:
@@ -115,7 +116,7 @@ class BacktestEngine:
 				if not isinstance(data[symbol], pd.DataFrame):
 					raise TypeError(f"The data for data[{symbol}] must be a pandas DataFrame")
 		
-		logger.info("Starting backtest | strategy=%s | symbols=%s | initial_cash=$%.2f | commission=$%.2f", ", ".join(a.strategy.label for a in assignments), ", ".join(data), self.initial_cash, self.commission)
+		logger.info("Starting backtest | strategies=%s | symbols=%s | initial_cash=$%.2f | commission=$%.2f", ", ".join(a.strategy.label for a in assignments), ", ".join(data), self.initial_cash, self.commission)
 
 		by_symbol, rank = self._index_assignments(assignments, data)
 
