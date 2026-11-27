@@ -14,66 +14,18 @@ class BacktestResults:
 		trades = portfolio.trades
 		cash = portfolio.cash
 		returns = pd.Series(portfolio.returns())
-		trade_amount = len(trades)
+
+		grouped: dict[str, list[Trade]] = {}
+		for trade in portfolio.trades:
+			grouped.setdefault(trade.strategy, []).append(trade)
 		
-		total_return = sum(trade.profit for trade in trades)
-		average_return = (total_return / trade_amount if trade_amount else 0.0)
-		
-		wins = sum(trade.profit > 0 for trade in trades)
-		losses = sum(trade.profit < 0 for trade in trades)
-
-		largest_win = max((trade.profit for trade in trades), default=0.0)
-		largest_loss = min((trade.profit for trade in trades), default=0.0)
-
-		winning_trades = [
-			trade
-			for trade in trades
-			if trade.profit > 0
-		]
-		average_win = (sum(trade.profit for trade in winning_trades) / len(winning_trades) if winning_trades else 0.0)
-
-		losing_trades = [
-			trade
-			for trade in trades
-			if trade.profit < 0
-		]
-		average_loss = (sum(trade.profit for trade in losing_trades) / len(losing_trades) if losing_trades else 0.0)
-
-		win_rate = (wins / trade_amount if trade_amount else 0.0)
-		loss_rate = (losses / trade_amount if trade_amount else 0.0)
-
-		winloss_ratio = (average_win / abs(average_loss) if average_loss else 0.0)
-
-		longest_holding = max((trade.holding_period for trade in trades), default=0.0)
-		shortest_holding = min((trade.holding_period for trade in trades), default=0.0)
-		average_holding = (sum(trade.holding_period for trade in trades) / trade_amount if trade_amount else 0.0)
-
 		sharpe_ratio, sharpe_rating = cls.calculate_sharpe(returns)
-		
-		gross_profit, gross_loss, profit_factor, profit_rating = cls.calculate_profit(trades)
-
-		expectancy = (win_rate * average_win) + (loss_rate * average_loss)
 		
 		return cls(
 			initial_cash = portfolio.initial_cash,
 			final_cash = cash,
-			total_return = total_return,
-			average_return = average_return,
-			trades = trades,
-			trade_count = trade_amount,
-			wins = wins,
-			largest_win = largest_win,
-			average_win = average_win,
-			winning_trades = winning_trades,
-			losses = losses,
-			largest_loss = largest_loss,
-			average_loss = average_loss,
-			losing_trades = losing_trades,
-			win_rate = win_rate,
-			winloss_ratio = winloss_ratio,
-			longest_holding = longest_holding,
-			shortest_holding = shortest_holding,
-			average_holding = average_holding,
+			stats = TradeStats.from_trades(portfolio.trades),
+			by_strategy = {label: TradeStats.from_trades(trades) for label, trades in grouped.items()},
 			cagr = cls.calculate_cagr(portfolio),
 			volatility = cls.calculate_volatility(returns),
 			sharpe_ratio = sharpe_ratio,
@@ -82,11 +34,6 @@ class BacktestResults:
 			drawdown = portfolio.drawdowns(),
 			max_drawdown = portfolio.max_drawdown(),
 			calmar_ratio = cls.calculate_calmar(portfolio),
-			gross_profit = gross_profit,
-			gross_loss = gross_loss,
-			profit_factor = profit_factor,
-			profit_rating = profit_rating,
-			expectancy = expectancy,
 			exposure = cls.calculate_exposure(portfolio),
 			recovery = cls.calculate_recovery(portfolio)
 		)
@@ -160,34 +107,6 @@ class BacktestResults:
 		return cagr / max_drawdown
 
 	@staticmethod
-	def calculate_profit(trades: list[Trade]) -> tuple[float, float, float, str]:
-		gross_profit = sum(
-			trade.profit
-			for trade in trades
-			if trade.profit > 0
-		)
-
-		gross_loss = abs(sum(
-			trade.profit
-			for trade in trades
-			if trade.profit < 0
-		))
-
-		if not trades:
-			return 0.0, 0.0, 0.0, "N/A"
-
-		profit_factor = gross_profit / gross_loss if gross_loss else float("inf")
-
-		if profit_factor >= 2:
-			profit_rating = "Excellent"
-		elif profit_factor >= 1:
-			profit_rating = "Net Positive"
-		else:
-			profit_rating = "Losing"
-
-		return gross_profit, gross_loss, profit_factor, profit_rating
-
-	@staticmethod
 	def calculate_exposure(portfolio: Portfolio) -> float:
 		"""Average share of equity invested in positions across all snapshots."""
 		if not portfolio.history:
@@ -213,6 +132,8 @@ class BacktestResults:
 		return net_return / max_drawdown
 
 	def __str__(self) -> str:
+		s = self.stats
+		
 		return (
 			f"\n"
 			f"{'=' * 60}\n"
@@ -220,20 +141,20 @@ class BacktestResults:
 			f"{'=' * 60}\n"
 			f"Initial Cash:      ${self.initial_cash:,.2f}\n"
 			f"Final Cash:        ${self.final_cash:,.2f}\n"
-			f"Net Profit:        ${self.total_return:,.2f}\n"
-			f"Average Trade:     ${self.average_return:,.2f}\n"
+			f"Net Profit:        ${s.total_return:,.2f}\n"
+			f"Average Trade:     ${s.average_return:,.2f}\n"
 			f"\n"
-			f"Trades:            {self.trade_count}\n"
-			f"Wins:              {self.wins}\n"
-			f"Losses:            {self.losses}\n"
-			f"Win Rate:          {self.win_rate:.2%}\n"
+			f"Trades:            {s.trade_count}\n"
+			f"Wins:              {s.wins}\n"
+			f"Losses:            {s.losses}\n"
+			f"Win Rate:          {s.win_rate:.2%}\n"
 			f"\n"
-			f"Largest Win:       ${self.largest_win:,.2f}\n"
-			f"Largest Loss:      ${self.largest_loss:,.2f}\n"
-			f"Average Win:       ${self.average_win:,.2f}\n"
-			f"Average Loss:      ${self.average_loss:,.2f}\n"
+			f"Largest Win:       ${s.largest_win:,.2f}\n"
+			f"Largest Loss:      ${s.largest_loss:,.2f}\n"
+			f"Average Win:       ${s.average_win:,.2f}\n"
+			f"Average Loss:      ${s.average_loss:,.2f}\n"
 			f"\n"
-			f"Profit Factor:     {self.profit_factor:.2f}, {self.profit_rating}\n"
+			f"Profit Factor:     {s.profit_factor:.2f}, {s.profit_rating}\n"
 			f"Sharpe Ratio:      {self.sharpe_ratio:.2f}, {self.sharpe_rating}\n"
 			f"Sortino Ratio:     {self.sortino_ratio:.2f}\n"
 			f"Calmar Ratio:      {self.calmar_ratio:.2f}\n"
@@ -243,41 +164,31 @@ class BacktestResults:
 			f"Max Drawdown:      {self.max_drawdown:.2%}\n"
 			f"Exposure:          {self.exposure:.2%}\n"
 			f"Recovery Factor:   {self.recovery:.2f}\n"
+			f"{'=' * 60}\n"
+			f"BY STRATEGY\n"
+			f"{self.strategy_table()}\n"
 			f"{'=' * 60}"
 		)
 
+	def strategy_table(self) -> str:
+		header = f"{'Strategy':<32}{'Trades':>7}{'Win %':>8}{'Net P&L':>13}{'PF':>7}{'Expect.':>10}"
+		rows = [header, "-" * len(header)]
+		for label, s in self.by_strategy.items():
+			rows.append(f"{label:<32}{s.trade_count:>7}{s.win_rate:>8.1%}{s.total_return:>13,.2f}{s.profit_factor:>7.2f}{s.expectancy:10,.2f}")
+		return "\n".join(rows)
+	
 	def print_trades(self):
 		print("\nTrades")
 		print("=" * 60)
 
-		for trade in self.trades:
+		for trade in self.stats.trades:
 			print(trade)
 	
 	initial_cash: float
 	final_cash: float
 
-	total_return: float
-	average_return: float
-
-	trades: list[Trade]
-	trade_count: int
-
-	wins: int
-	largest_win: float
-	average_win: float
-	winning_trades: list[Trade]
-	
-	losses: int
-	largest_loss: float
-	average_loss: float
-	losing_trades: list[Trade]
-
-	win_rate: float
-	winloss_ratio: float
-
-	longest_holding: int
-	shortest_holding: int
-	average_holding: float
+	stats: TradeStats
+	by_strategy: dict[str, TradeStats]
 
 	cagr: float
 
@@ -292,13 +203,6 @@ class BacktestResults:
 	max_drawdown: float
 
 	calmar_ratio: float
-
-	gross_profit: float
-	gross_loss: float
-	profit_factor: float
-	profit_rating: str
-
-	expectancy: float
 
 	exposure: float
 
