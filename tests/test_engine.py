@@ -184,5 +184,55 @@ def test_no_signals_means_no_trades_and_clean_results():
     str(results)
 
 
+# ------------------------------------------------------------- next-bar-open fills
+def test_fill_price_applies_slippage():
+    engine = BacktestEngine(slippage_bps=10)
+    assert abs(engine._fill_price(100.0, "buy") - 100.10) < 1e-9
+    assert abs(engine._fill_price(100.0, "sell") - 99.90) < 1e-9
+    assert BacktestEngine()._fill_price(100.0, "buy") == 100.0   # default: no slippage
+
+
+def test_signal_fills_at_next_bars_open():
+    data = {"AAA": make_prices(seed=1)}
+    df = data["AAA"]
+    _, p = run_engine(ScriptedStrategy({40: 1, 80: -1}), data, max_volatility=5.0)
+    t = p.trades[0]
+    assert t.entry_date == df.index[41] and abs(t.entry_price - df["Open"].iloc[41]) < 1e-9
+    assert t.exit_date == df.index[81] and abs(t.exit_price - df["Open"].iloc[81]) < 1e-9
+
+
+def test_slippage_moves_fills_against_us():
+    data = {"AAA": make_prices(seed=1)}
+    df = data["AAA"]
+    _, p = run_engine(ScriptedStrategy({40: 1, 80: -1}), data, max_volatility=5.0, slippage_bps=10)
+    t = p.trades[0]
+    assert abs(t.entry_price - df["Open"].iloc[41] * 1.001) < 1e-9
+    assert abs(t.exit_price - df["Open"].iloc[81] * 0.999) < 1e-9
+
+
+def test_signal_on_last_bar_is_dropped():
+    _, p = run_engine(ScriptedStrategy({-1: 1}), {"AAA": make_prices(seed=1)}, max_volatility=5.0)
+    assert p.trades == []
+
+
+def test_trades_record_the_strategy_label():
+    strategy = ScriptedStrategy({40: 1, 80: -1})
+    _, p = run_engine(strategy, {"AAA": make_prices(seed=1)}, max_volatility=5.0)
+    assert p.trades and all(t.strategy == strategy.label for t in p.trades)
+
+
+def test_no_lookahead_future_bars_do_not_change_past_trades():
+    """Cutting off the future must not change any trade that finished before the cut."""
+    full = {"AAA": make_prices(seed=1, bars=300)}
+    cut = {"AAA": full["AAA"].iloc[:200].copy()}
+    last = cut["AAA"].index[-1]
+    _, a = run_engine(MacdStrategy(), full, max_volatility=5.0)
+    _, b = run_engine(MacdStrategy(), cut, max_volatility=5.0)
+    key = lambda t: (t.entry_date, round(t.entry_price, 9), t.exit_date, round(t.exit_price, 9), round(t.shares, 9))
+    before_a = [key(t) for t in a.trades if t.exit_date < last]
+    before_b = [key(t) for t in b.trades if t.exit_date < last]
+    assert before_a and before_a == before_b
+
+
 if __name__ == "__main__":
     sys.exit(1 if run_tests(globals(), "Engine") else 0)
