@@ -7,6 +7,7 @@ from risk.allocation import Allocator
 from risk.riskclass import Risk
 from models.results import BacktestResults
 from models.event import MarketEvent
+from models.assignment import Assignment
 from utils.logger import logger
 
 class BacktestEngine:
@@ -18,7 +19,7 @@ class BacktestEngine:
 		self.allocator = Allocator(target_risk=target_risk, min_allocation=min_allocation, max_allocation=max_allocation, max_volatility=max_volatility)
 		self.risk = Risk(annualize=annualize, trading_periods=trading_periods, lookback=lookback)
 		
-	def _simulate(self, events, data, label):
+	def _simulate(self, events, data, rank):
 		portfolio = Portfolio(
 			self.initial_cash,
 			self.commission
@@ -36,12 +37,16 @@ class BacktestEngine:
 					portfolio.sell(event.symbol, event.date, self._fill_price(event.open, "sell"))
 				last_prices[event.symbol] = event.close
 
-			#Buy Loop
+			buys = [event for event in date_events if event.signal == 1]
+			buys.sort(key=lambda event: rank[event.symbol])
+			
+			#Buy Loops
+			for event in buys:
+				volatility = self.risk.volatility(data[event.symbol], event.date)
+				allocation = self.allocator.calculate(volatility)
+				portfolio.buy(event.symbol, event.date, self._fill_price(event.open, "buy"), allocation, event.strategy)
+			
 			for event in date_events:
-				if event.signal == 1:
-					volatility = self.risk.volatility(data[event.symbol], event.date)
-					allocation = self.allocator.calculate(volatility)
-					portfolio.buy(event.symbol, event.date, self._fill_price(event.open, "buy"), allocation, label)
 				last_prices[event.symbol] = event.close
 			
 			portfolio.snapshot(date, last_prices)
@@ -55,11 +60,12 @@ class BacktestEngine:
 
 		return portfolio
 
-	def _build_events(self, signals):
+	def _build_events(self, signals, by_symbol):
 		events = []
 
 		for symbol, df in signals.items():
 			pending = df["Signal"].shift(1, fill_value=0)
+			strategy = by_symbol[symbol]
 			
 			if df["Signal"].iloc[-1] != 0:
 				logger.info("Dropping %s signal on the last bar (%s): no next open to fill at", symbol, df.index[-1])
@@ -68,6 +74,7 @@ class BacktestEngine:
 				events.append(
 					MarketEvent(
 						date = index,
+						strategy = strategy.label,
 						symbol = symbol,
 						close = row["Close"],
 						open = row["Open"],
@@ -98,7 +105,7 @@ class BacktestEngine:
 				rank[symbol] = (i, j)
 		return by_symbol, rank
 
-	def run(self, assignments, data: dict[str, pd.DataFrame]):
+	def run(self, assignments: list[Assignment], data: dict[str, pd.DataFrame]):
 		if not isinstance(data, dict):
 			raise TypeError("data must be a dictionary")
 		else:
@@ -108,19 +115,20 @@ class BacktestEngine:
 				if not isinstance(data[symbol], pd.DataFrame):
 					raise TypeError(f"The data for data[{symbol}] must be a pandas DataFrame")
 		
-		logger.info("Starting backtest | strategy=%s | symbols=%s | initial_cash=$%.2f | commission=$%.2f", strategy.label, ", ".join(data), self.initial_cash, self.commission)
+		logger.info("Starting backtest | strategy=%s | symbols=%s | initial_cash=$%.2f | commission=$%.2f", ", ".join(a.strategy.label for a in assignments), ", ".join(data), self.initial_cash, self.commission)
 
 		by_symbol, rank = self._index_assignments(assignments, data)
 
 		signals = {}
-		for symbol, df in data.items():
+		for symbol, strategy in by_symbol.items():
+			df = data[symbol]
 			df, buy, sell = strategy.generate_signals(df)
 			signals[symbol] = strategy.apply_signals(df, buy, sell)
 			logger.info("Signals for %s: %d buy, %d sell (%d bars)", symbol, (signals[symbol]["Signal"] == 1).sum(), (signals[symbol]["Signal"] == -1).sum(), len(signals[symbol]))
 
-		events = self._build_events(signals)
+		events = self._build_events(signals, by_symbol)
 		
-		portfolio = self._simulate(events, data, strategy.label)
+		portfolio = self._simulate(events, data, rank)
 
 		logger.info("Backtest finished | %d events | %s to %s | %d trade(s) | final cash=$%.2f", len(events), events[0].date if events else "n/a", events[-1].date if events else "n/a", len(portfolio.trades), portfolio.cash)
 
